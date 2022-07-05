@@ -105,16 +105,16 @@ module.exports = (srv) => {
         }
 
         try {
-            // await executeHttpRequest(
-            //     {
-            //         destinationName: "Mail_Service_API"
-            //     },
-            //     {
-            //         method: 'POST',
-            //         data: devpayload,
-            //         url: "/mailrequests"
-            //     }
-            // )
+            await executeHttpRequest(
+                {
+                    destinationName: "Mail_Service_API"
+                },
+                {
+                    method: 'POST',
+                    data: devpayload,
+                    url: "/mailrequests"
+                }
+            )
         }
         catch (error) {
             console.log("Error occured during mail sending, kindly check at mail service");
@@ -137,28 +137,28 @@ module.exports = (srv) => {
         req.info(`Update CD ${selectedCD} completed, please refresh to view the updated data`);
 
         if ((overallStatus == "Completed") & selectresult[0].gcmEmail != "") {
-            // var payload = {
-            //     "sender": "sapcoebtpgeneral@ppg.com",
-            //     "recipient": gcmEmail,
-            //     "subject": "CD Ready for Withdrawal",
-            //     "body": `Changes for CD ${selectedCD} have been completed reversed. The CD can now be withdrawn in SOLMAN.`
-            // }
+            var payload = {
+                "sender": "sapcoebtpgeneral@ppg.com",
+                "recipient": gcmEmail,
+                "subject": "CD Ready for Withdrawal",
+                "body": `Changes for CD ${selectedCD} have been completed reversed. The CD can now be withdrawn in SOLMAN.`
+            }
 
-            // try {
-            //     await executeHttpRequest(
-            //         {
-            //             destinationName: "Mail_Service_API"
-            //         },
-            //         {
-            //             method: 'POST',
-            //             data: payload,
-            //             url: "/mailrequests"
-            //         }
-            //     )
-            // }
-            // catch (error) {
-            //     console.log("Error occured during mail sending, kindly check at mail service");
-            // }
+            try {
+                await executeHttpRequest(
+                    {
+                        destinationName: "Mail_Service_API"
+                    },
+                    {
+                        method: 'POST',
+                        data: payload,
+                        url: "/mailrequests"
+                    }
+                )
+            }
+            catch (error) {
+                console.log("Error occured during mail sending, kindly check at mail service");
+            }
         }
 
     })
@@ -178,26 +178,26 @@ module.exports = (srv) => {
         await cds.run(updatequery);
         req.info(`Update CD ${selectedCD} completed, please refresh to view the updated data`);
 
-        // if((overallStatus == "Completed") & selectresult[0].gcmEmail != ""){
-        //     var payload = {
-        //         "sender": "sapcoebtpgeneral@ppg.com",
-        //         "recipient": gcmEmail,
-        //         "subject": "CD Ready for Withdrawal",
-        //         "body": `A notification that changes for CD ${selectedCD} have been completed reversed. The CD can now be withdrawn in SOLMAN.`
-        //     }
+        if((overallStatus == "Completed") & selectresult[0].gcmEmail != ""){
+            var payload = {
+                "sender": "sapcoebtpgeneral@ppg.com",
+                "recipient": gcmEmail,
+                "subject": "CD Ready for Withdrawal",
+                "body": `A notification that changes for CD ${selectedCD} have been completed reversed. The CD can now be withdrawn in SOLMAN.`
+            }
 
-        //     const response = await executeHttpRequest(
-        //         {
-        //             destinationName: "Mail_Service_API"
-        //         },
-        //         {
-        //             method: 'POST',
-        //             data: payload,
-        //             url: "/mailrequests"
-        //         }
-        //     );
-        //     console.log(response.data);
-        // }
+            const response = await executeHttpRequest(
+                {
+                    destinationName: "Mail_Service_API"
+                },
+                {
+                    method: 'POST',
+                    data: payload,
+                    url: "/mailrequests"
+                }
+            );
+            console.log(response.data);
+        }
     })
 
     srv.on('updateCDList', async (req) => {
@@ -330,40 +330,40 @@ module.exports = (srv) => {
 
             if (sendBaa == true) {
                 console.log("Sending email to BAA")
-                // try {
-                //     await executeHttpRequest(
-                //         {
-                //             destinationName: "Mail_Service_API"
-                //         },
-                //         {
-                //             method: 'POST',
-                //             data: baapayload,
-                //             url: "/mailrequests"
-                //         }
-                //     )
-                // }
-                // catch (error) {
-                //     console.log("Error occured during mail sending, kindly check at mail service");
-                // }
+                try {
+                    await executeHttpRequest(
+                        {
+                            destinationName: "Mail_Service_API"
+                        },
+                        {
+                            method: 'POST',
+                            data: baapayload,
+                            url: "/mailrequests"
+                        }
+                    )
+                }
+                catch (error) {
+                    console.log("Error occured during mail sending, kindly check at mail service");
+                }
             }
 
             if (sendDev == true) {
                 console.log("Sending email to developer")
-                // try {
-                //     await executeHttpRequest(
-                //         {
-                //             destinationName: "Mail_Service_API"
-                //         },
-                //         {
-                //             method: 'POST',
-                //             data: devpayload,
-                //             url: "/mailrequests"
-                //         }
-                //     )
-                // }
-                // catch (error) {
-                //     console.log("Error occured during mail sending, kindly check at mail service");
-                // }
+                try {
+                    await executeHttpRequest(
+                        {
+                            destinationName: "Mail_Service_API"
+                        },
+                        {
+                            method: 'POST',
+                            data: devpayload,
+                            url: "/mailrequests"
+                        }
+                    )
+                }
+                catch (error) {
+                    console.log("Error occured during mail sending, kindly check at mail service");
+                }
             }
 
         }

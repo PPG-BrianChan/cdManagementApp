@@ -36,28 +36,28 @@ annotate cm.withdrawalCD with @UI : {
 
     LineItem          : [
         {
-            $Type             : 'UI.DataFieldForAction',
-            Action            : 'cm_cdservice.assignBAA',
-            Label             : 'Assign BAA',
-            // ![@UI.Hidden]        : assignBaaHidden
+            $Type  : 'UI.DataFieldForAction',
+            Action : 'cm_cdservice.assignBAA',
+            Label  : 'Assign BAA',
+        // ![@UI.Hidden]        : assignBaaHidden
         },
         {
-            $Type             : 'UI.DataFieldForAction',
-            Action            : 'cm_cdservice.assignDev',
-            Label             : 'Assign Developer',
-            // ![@UI.Hidden]        : assignDevHidden
+            $Type  : 'UI.DataFieldForAction',
+            Action : 'cm_cdservice.assignDev',
+            Label  : 'Assign Developer',
+        // ![@UI.Hidden]        : assignDevHidden
         },
         {
-            $Type             : 'UI.DataFieldForAction',
-            Action            : 'cm_cdservice.updateCustStatus',
-            Label             : 'Update Cust Status',
-            // ![@UI.Hidden]        : updateCustHidden,
+            $Type  : 'UI.DataFieldForAction',
+            Action : 'cm_cdservice.updateCustStatus',
+            Label  : 'Update Cust Status',
+        // ![@UI.Hidden]        : updateCustHidden,
         },
         {
-            $Type             : 'UI.DataFieldForAction',
-            Action            : 'cm_cdservice.updateWorkStatus',
-            Label             : 'Update Work Status',
-            // ![@UI.Hidden]        : updateWorkHidden,
+            $Type  : 'UI.DataFieldForAction',
+            Action : 'cm_cdservice.updateWorkStatus',
+            Label  : 'Update Work Status',
+        // ![@UI.Hidden]        : updateWorkHidden,
         },
         {
             $Type : 'UI.DataField',
@@ -181,3 +181,81 @@ annotate cm.transportreq with
     ]},
 
 };
+
+annotate cm_cdservice.withdrawalCD actions {
+    @Common                          : {SideEffects : {
+        $Type          : 'Common.SideEffectsType',
+        TargetEntities : [_it],
+    }, }
+    @cds.odata.bindingparameter.name : '_it'
+    @Core.OperationAvailable         : _it.assignBaaEnabled
+    assignBAA(
+    @Common                          : {
+        ValueListWithFixedValues : false,
+        ValueList                : {
+            Label          : '{i18n>User}',
+            CollectionPath : 'users',
+            Parameters     : [
+                {
+                    $Type             : 'Common.ValueListParameterInOut',
+                    ValueListProperty : 'userid',
+                    LocalDataProperty : newBaa
+                },
+                {
+                    $Type             : 'Common.ValueListParameterDisplayOnly',
+                    ValueListProperty : 'fullname'
+                },
+                {
+                    $Type             : 'Common.ValueListParameterInOut',
+                    ValueListProperty : 'email',
+                    LocalDataProperty : newEmail
+                }
+            ]
+        }
+    }
+    @title                           : '{i18n>newBAA}'
+    newBaa, 
+    @UI.Hidden
+    newEmail);
+    @Common                          : {SideEffects : {
+        $Type          : 'Common.SideEffectsType',
+        TargetEntities : [_it],
+    }, }
+    @cds.odata.bindingparameter.name : '_it'
+    @Core.OperationAvailable         : _it.assignDevEnabled
+    assignDev(
+    @Common                          : {
+        ValueListWithFixedValues : false,
+        ValueList                : {
+            Label          : '{i18n>User}',
+            CollectionPath : 'users',
+            Parameters     : [
+                {
+                    $Type             : 'Common.ValueListParameterInOut',
+                    ValueListProperty : 'userid',
+                    LocalDataProperty : newDev
+                },
+                {
+                    $Type             : 'Common.ValueListParameterDisplayOnly',
+                    ValueListProperty : 'fullname'
+                },
+                {
+                    $Type             : 'Common.ValueListParameterInOut',
+                    ValueListProperty : 'email',
+                    LocalDataProperty : newEmail
+                },
+            ]
+        }
+    }
+    @title                           : '{i18n>newDev}'
+    newDev,
+    @UI.Hidden
+    newEmail);
+
+    @cds.odata.bindingparameter.name : '_it'
+    @Core.OperationAvailable         : _it.updateCustEnabled
+    updateCustStatus;
+    @cds.odata.bindingparameter.name : '_it'
+    @Core.OperationAvailable         : _it.updateWorkEnabled
+    updateWorkStatus
+}
