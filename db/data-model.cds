@@ -6,19 +6,19 @@ using {
 } from '@sap/cds/common';
 
 entity withdrawalCD : cuid, managed {
-    key cdid                     : String;
-        cdDesc                   : String;
-        overallStatus            : String;
-        baa                      : String;
-        baaEmail                 : String;
-        developer                : String;
-        devEmail                 : String;
-        gcm                      : String;
-        gcmEmail                 : String;
-        custStatus               : String;
-        workStatus               : String;
-        transportlist            : Composition of many transportreq
-                                       on transportlist.parent = $self;
+    key cdid                      : String;
+        cdDesc                    : String;
+        overallStatus             : String;
+        baa                       : String;
+        baaEmail                  : String;
+        developer                 : String;
+        devEmail                  : String;
+        gcm                       : String;
+        gcmEmail                  : String;
+        custStatus                : String;
+        workStatus                : String;
+        transportlist             : Composition of many transportreq
+                                        on transportlist.parent = $self;
         virtual assignBaaEnabled  : Boolean default true;
         virtual assignDevEnabled  : Boolean default true;
         virtual updateCustEnabled : Boolean default true;
@@ -51,7 +51,7 @@ type inputCD {
     gcmEmail            : String;
     tr_links            : many {
         originator_id   : String;
-        troder_number   : String;
+        trorder_number  : String;
         description     : String;
         sys_type        : String;
         sys_client      : String(3);

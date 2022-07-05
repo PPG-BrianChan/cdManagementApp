@@ -14,12 +14,12 @@ Content-Type: application/json
         "description" : "TESTING",
         "posting_date": "2017-06-11",
         "tr_links": [
-            { "originator_id": "ASWW589EGSAQ985EFX#&G8621##56823", "troder_number": "T15K918390SA", "description": "3001333: Test Change URGENT",
+            { "originator_id": "ASWW589EGSAQ985EFX#&G8621##56823", "trorder_number": "T15K918390SA", "description": "3001333: Test Change URGENT",
               "sys_type": "ABAP","sys_client": "100", "cts_id": "T15_P00404", "transport_track": "TR000025",
-              "resp_user": "V614944", "userEmail":"cchan@ppg.com", "trfunction": "K", "status": "INPROGRESS" },
-            { "originator_id": "ASWW589EGSAQ985EFX#&G8621##56823", "troder_number": "T15K9999999A", "description": "3001333: Test Change URGENT 2",
+              "resp_user": "V614944", "userEmail":"cchan@ppg.com", "trfunction": "K", "status": "InProgress" },
+            { "originator_id": "ASWW589EGSAQ985EFX#&G8621##56823", "trorder_number": "T15K9999999A", "description": "3001333: Test Change URGENT 2",
               "sys_type": "ABAP","sys_client": "100", "cts_id": "T15_P00404", "transport_track": "TR000025",
-              "resp_user": "S999999", "userEmail":"chiewvoon93@gmail.com", "trfunction": "W", "status": "INPROGRESS" }
+              "resp_user": "S999999", "userEmail":"chiewvoon93@gmail.com", "trfunction": "W", "status": "InProgress" }
         ]
     },
     {
@@ -31,12 +31,12 @@ Content-Type: application/json
         "description" : "TESTING 2",
         "posting_date": "2017-06-21",
         "tr_links": [
-            { "originator_id": "ASWW589EGSAQ985EFX#&G8621##56899", "troder_number": "T15K911111SA", "description": "3001339: Test Change URGENT",
+            { "originator_id": "ASWW589EGSAQ985EFX#&G8621##56899", "trorder_number": "T15K911111SA", "description": "3001339: Test Change URGENT",
               "sys_type": "ABAP","sys_client": "100", "cts_id": "T15_P00404", "transport_track": "TR000025",
-              "resp_user": "K817663","userEmail":"cchan@ppg.com", "trfunction": "W", "status": "INPROGRESS" },
-            { "originator_id": "ASWW589EGSAQ985EFX#&G8621##56899", "troder_number": "T15K2222222A", "description": "3001339: Test Change URGENT 2",
+              "resp_user": "K817663","userEmail":"cchan@ppg.com", "trfunction": "W", "status": "InProgress" },
+            { "originator_id": "ASWW589EGSAQ985EFX#&G8621##56899", "trorder_number": "T15K2222222A", "description": "3001339: Test Change URGENT 2",
               "sys_type": "ABAP","sys_client": "100", "cts_id": "T15_P00404", "transport_track": "TR000025",
-              "resp_user": "K817663","userEmail":"cchan@ppg.com", "trfunction": "W", "status": "INPROGRESS" }
+              "resp_user": "K817663","userEmail":"cchan@ppg.com", "trfunction": "W", "status": "InProgress" }
         ]
     }
     ]

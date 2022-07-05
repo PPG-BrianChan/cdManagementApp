@@ -158,7 +158,7 @@ module.exports = (srv) => {
             //Default status to success, any TR in progress will set value to "InProgress"
             let overallStatus = custStatus = workStatus = "Completed";
             for (let trEntry of cdEntry[1].tr_links.entries()) {
-                console.log("Processing TR:", trEntry[1].troder_number);
+                console.log("Processing TR:", trEntry[1].trorder_number);
                 if (trEntry[1].trfunction == 'K') {
                     baa = trEntry[1].resp_user;
                     baaEmail = trEntry[1].userEmail;
@@ -176,7 +176,7 @@ module.exports = (srv) => {
                 let inputTR = {
                     parent_ID: "",
                     parent_cdid: "",
-                    transportnum: trEntry[1].troder_number,
+                    transportnum: trEntry[1].trorder_number,
                     resp_user: trEntry[1].resp_user,
                     trfunction: trEntry[1].trfunction,
                     status: trEntry[1].status
