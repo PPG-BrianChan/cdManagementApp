@@ -1,0 +1,150 @@
+{
+    "_version": "1.40.0",
+    "sap.app": {
+        "id": "cdmanagementappui",
+        "type": "application",
+        "i18n": "i18n/i18n.properties",
+        "applicationVersion": {
+            "version": "0.0.1"
+        },
+        "title": "{{appTitle}}",
+        "description": "{{appDescription}}",
+        "resources": "resources.json",
+        "sourceTemplate": {
+            "id": "@sap-ux/fiori-elements-writer:lrop",
+            "version": "0.3.6",
+            "toolsId": "92ea497b-9560-4cfc-8fd2-cd83bc4e8e96"
+        },
+        "dataSources": {
+            "mainService": {
+                "uri": "cm-cdservice/",
+                "type": "OData",
+                "settings": {
+                    "annotations": [
+                        "annotation"
+                    ],
+                    "localUri": "localService/metadata.xml",
+                    "odataVersion": "4.0"
+                }
+            },
+            "annotation": {
+                "type": "ODataAnnotation",
+                "uri": "annotations/annotation.xml",
+                "settings": {
+                    "localUri": "annotations/annotation.xml"
+                }
+            }
+        }
+    },
+    "sap.ui": {
+        "technology": "UI5",
+        "icons": {
+            "icon": "",
+            "favIcon": "",
+            "phone": "",
+            "phone@2": "",
+            "tablet": "",
+            "tablet@2": ""
+        },
+        "deviceTypes": {
+            "desktop": true,
+            "tablet": true,
+            "phone": true
+        }
+    },
+    "sap.ui5": {
+        "flexEnabled": true,
+        "dependencies": {
+            "minUI5Version": "1.102.1",
+            "libs": {
+                "sap.m": {},
+                "sap.ui.core": {},
+                "sap.ushell": {},
+                "sap.fe.templates": {}
+            }
+        },
+        "contentDensities": {
+            "compact": true,
+            "cozy": true
+        },
+        "models": {
+            "i18n": {
+                "type": "sap.ui.model.resource.ResourceModel",
+                "settings": {
+                    "bundleName": "cdmanagementappui.i18n.i18n"
+                }
+            },
+            "": {
+                "dataSource": "mainService",
+                "preload": true,
+                "settings": {
+                    "synchronizationMode": "None",
+                    "operationMode": "Server",
+                    "autoExpandSelect": true,
+                    "earlyRequests": true
+                }
+            },
+            "@i18n": {
+                "type": "sap.ui.model.resource.ResourceModel",
+                "uri": "i18n/i18n.properties"
+            }
+        },
+        "resources": {
+            "css": []
+        },
+        "routing": {
+            "config": {},
+            "routes": [
+                {
+                    "pattern": ":?query:",
+                    "name": "withdrawalCDList",
+                    "target": "withdrawalCDList"
+                },
+                {
+                    "pattern": "withdrawalCD({key}):?query:",
+                    "name": "withdrawalCDObjectPage",
+                    "target": "withdrawalCDObjectPage"
+                }
+            ],
+            "targets": {
+                "withdrawalCDList": {
+                    "type": "Component",
+                    "id": "withdrawalCDList",
+                    "name": "sap.fe.templates.ListReport",
+                    "options": {
+                        "settings": {
+                            "entitySet": "withdrawalCD",
+                            "variantManagement": "Page",
+                            "navigation": {
+                                "withdrawalCD": {
+                                    "detail": {
+                                        "route": "withdrawalCDObjectPage"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "withdrawalCDObjectPage": {
+                    "type": "Component",
+                    "id": "withdrawalCDObjectPage",
+                    "name": "sap.fe.templates.ObjectPage",
+                    "options": {
+                        "settings": {
+                            "editableHeaderContent": false,
+                            "entitySet": "withdrawalCD"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "sap.fiori": {
+        "registrationIds": [],
+        "archeType": "transactional"
+    },
+    "sap.cloud": {
+        "public": true,
+        "service": "cdManagementApp-approuter"
+    }
+}

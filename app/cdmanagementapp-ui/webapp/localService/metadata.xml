@@ -1,0 +1,494 @@
+<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="4.0" xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx">
+    <edmx:Reference Uri="https://oasis-tcs.github.io/odata-vocabularies/vocabularies/Org.OData.Capabilities.V1.xml">
+        <edmx:Include Alias="Capabilities" Namespace="Org.OData.Capabilities.V1"/>
+    </edmx:Reference>
+    <edmx:Reference Uri="https://sap.github.io/odata-vocabularies/vocabularies/Common.xml">
+        <edmx:Include Alias="Common" Namespace="com.sap.vocabularies.Common.v1"/>
+    </edmx:Reference>
+    <edmx:Reference Uri="https://oasis-tcs.github.io/odata-vocabularies/vocabularies/Org.OData.Core.V1.xml">
+        <edmx:Include Alias="Core" Namespace="Org.OData.Core.V1"/>
+    </edmx:Reference>
+    <edmx:Reference Uri="https://sap.github.io/odata-vocabularies/vocabularies/UI.xml">
+        <edmx:Include Alias="UI" Namespace="com.sap.vocabularies.UI.v1"/>
+    </edmx:Reference>
+    <edmx:DataServices>
+        <Schema Namespace="cm_cdservice" xmlns="http://docs.oasis-open.org/odata/ns/edm">
+            <EntityContainer Name="EntityContainer">
+                <EntitySet Name="withdrawalCD" EntityType="cm_cdservice.withdrawalCD">
+                    <NavigationPropertyBinding Path="transportlist" Target="transportreq"/>
+                </EntitySet>
+                <EntitySet Name="status" EntityType="cm_cdservice.status"/>
+                <EntitySet Name="users" EntityType="cm_cdservice.users"/>
+                <EntitySet Name="transportreq" EntityType="cm_cdservice.transportreq">
+                    <NavigationPropertyBinding Path="parent" Target="withdrawalCD"/>
+                </EntitySet>
+                <ActionImport Name="updateCDList" Action="cm_cdservice.updateCDList"/>
+            </EntityContainer>
+            <EntityType Name="withdrawalCD">
+                <Key>
+                    <PropertyRef Name="ID"/>
+                    <PropertyRef Name="cdid"/>
+                </Key>
+                <Property Name="ID" Type="Edm.Guid" Nullable="false"/>
+                <Property Name="createdAt" Type="Edm.DateTimeOffset" Precision="7"/>
+                <Property Name="createdBy" Type="Edm.String" MaxLength="255"/>
+                <Property Name="modifiedAt" Type="Edm.DateTimeOffset" Precision="7"/>
+                <Property Name="modifiedBy" Type="Edm.String" MaxLength="255"/>
+                <Property Name="cdid" Type="Edm.String" Nullable="false"/>
+                <Property Name="cdDesc" Type="Edm.String"/>
+                <Property Name="overallStatus" Type="Edm.String" MaxLength="1"/>
+                <Property Name="baa" Type="Edm.String"/>
+                <Property Name="baaEmail" Type="Edm.String"/>
+                <Property Name="developer" Type="Edm.String"/>
+                <Property Name="devEmail" Type="Edm.String"/>
+                <Property Name="gcm" Type="Edm.String"/>
+                <Property Name="gcmEmail" Type="Edm.String"/>
+                <Property Name="custStatus" Type="Edm.String" MaxLength="1"/>
+                <Property Name="workStatus" Type="Edm.String" MaxLength="1"/>
+                <NavigationProperty Name="transportlist" Type="Collection(cm_cdservice.transportreq)" Partner="parent">
+                    <OnDelete Action="Cascade"/>
+                </NavigationProperty>
+                <Property Name="assignBaaHidden" Type="Edm.Boolean"/>
+                <Property Name="assignDevHidden" Type="Edm.Boolean"/>
+                <Property Name="updateCustHidden" Type="Edm.Boolean"/>
+                <Property Name="updateWorkHidden" Type="Edm.Boolean"/>
+            </EntityType>
+            <EntityType Name="status">
+                <Property Name="status" Type="Edm.String"/>
+                <Property Name="description" Type="Edm.String"/>
+            </EntityType>
+            <EntityType Name="users">
+                <Key>
+                    <PropertyRef Name="userid"/>
+                </Key>
+                <Property Name="userid" Type="Edm.String" Nullable="false"/>
+                <Property Name="fullname" Type="Edm.String"/>
+                <Property Name="email" Type="Edm.String"/>
+            </EntityType>
+            <EntityType Name="transportreq">
+                <Key>
+                    <PropertyRef Name="ID"/>
+                    <PropertyRef Name="parent_ID"/>
+                    <PropertyRef Name="parent_cdid"/>
+                    <PropertyRef Name="transportnum"/>
+                </Key>
+                <Property Name="ID" Type="Edm.Guid" Nullable="false"/>
+                <Property Name="createdAt" Type="Edm.DateTimeOffset" Precision="7"/>
+                <Property Name="createdBy" Type="Edm.String" MaxLength="255"/>
+                <Property Name="modifiedAt" Type="Edm.DateTimeOffset" Precision="7"/>
+                <Property Name="modifiedBy" Type="Edm.String" MaxLength="255"/>
+                <NavigationProperty Name="parent" Type="cm_cdservice.withdrawalCD" Partner="transportlist">
+                    <ReferentialConstraint Property="parent_ID" ReferencedProperty="ID"/>
+                    <ReferentialConstraint Property="parent_cdid" ReferencedProperty="cdid"/>
+                </NavigationProperty>
+                <Property Name="parent_ID" Type="Edm.Guid" Nullable="false"/>
+                <Property Name="parent_cdid" Type="Edm.String" Nullable="false"/>
+                <Property Name="transportnum" Type="Edm.String" Nullable="false"/>
+                <Property Name="resp_user" Type="Edm.String"/>
+                <Property Name="trfunction" Type="Edm.String" MaxLength="1"/>
+                <Property Name="status" Type="Edm.String"/>
+            </EntityType>
+            <ComplexType Name="cdManagementApp_inputCD">
+                <Property Name="guid" Type="Edm.String"/>
+                <Property Name="guid32" Type="Edm.String"/>
+                <Property Name="object_id" Type="Edm.String"/>
+                <Property Name="created_by" Type="Edm.String"/>
+                <Property Name="process_type" Type="Edm.String" MaxLength="4"/>
+                <Property Name="posting_date" Type="Edm.Date"/>
+                <Property Name="description" Type="Edm.String"/>
+                <Property Name="tr_links" Type="Collection(cm_cdservice.cdManagementApp_inputCD_tr_links)" Nullable="false"/>
+            </ComplexType>
+            <ComplexType Name="cdManagementApp_inputCD_tr_links">
+                <Property Name="originator_id" Type="Edm.String"/>
+                <Property Name="troder_number" Type="Edm.String"/>
+                <Property Name="description" Type="Edm.String"/>
+                <Property Name="sys_type" Type="Edm.String"/>
+                <Property Name="sys_client" Type="Edm.String" MaxLength="3"/>
+                <Property Name="cts_id" Type="Edm.String"/>
+                <Property Name="transport_track" Type="Edm.String"/>
+                <Property Name="resp_user" Type="Edm.String"/>
+                <Property Name="userEmail" Type="Edm.String"/>
+                <Property Name="trfunction" Type="Edm.String" MaxLength="1"/>
+                <Property Name="status" Type="Edm.String"/>
+            </ComplexType>
+            <Action Name="assignBAA" IsBound="true">
+                <Parameter Name="in" Type="cm_cdservice.withdrawalCD"/>
+                <Parameter Name="newBaa" Type="Edm.String"/>
+            </Action>
+            <Action Name="assignDev" IsBound="true">
+                <Parameter Name="in" Type="cm_cdservice.withdrawalCD"/>
+                <Parameter Name="newDev" Type="Edm.String"/>
+            </Action>
+            <Action Name="updateCustStatus" IsBound="true">
+                <Parameter Name="in" Type="cm_cdservice.withdrawalCD"/>
+            </Action>
+            <Action Name="updateWorkStatus" IsBound="true">
+                <Parameter Name="in" Type="cm_cdservice.withdrawalCD"/>
+            </Action>
+            <Action Name="updateCDList" IsBound="false">
+                <Parameter Name="inputcd" Type="Collection(cm_cdservice.cdManagementApp_inputCD)" Nullable="false"/>
+            </Action>
+            <Annotations Target="cm_cdservice.withdrawalCD">
+                <Annotation Term="UI.HeaderInfo">
+                    <Record Type="UI.HeaderInfoType">
+                        <PropertyValue Property="TypeName" String="{i18n>CD}"/>
+                            <PropertyValue Property="TypeNamePlural" String="{i18n>CDs}"/>
+                                <PropertyValue Property="Title">
+                                    <Record Type="UI.DataField">
+                                        <PropertyValue Property="Value" Path="cdid"/>
+                                    </Record>
+                                </PropertyValue>
+                                <PropertyValue Property="Description">
+                                    <Record Type="UI.DataField">
+                                        <PropertyValue Property="Value" Path="cdDesc"/>
+                                    </Record>
+                                </PropertyValue>
+                            </Record>
+                        </Annotation>
+                        <Annotation Term="UI.SelectionFields">
+                            <Collection>
+                                <PropertyPath>cdid</PropertyPath>
+                                <PropertyPath>gcm</PropertyPath>
+                                <PropertyPath>baa</PropertyPath>
+                                <PropertyPath>developer</PropertyPath>
+                            </Collection>
+                        </Annotation>
+                        <Annotation Term="UI.LineItem">
+                            <Collection>
+                                <Record Type="UI.DataFieldForAction">
+                                    <PropertyValue Property="Action" String="cm_cdservice.assignBAA"/>
+                                    <PropertyValue Property="Label" String="Assign BAA"/>
+                                    <Annotation Term="UI.Hidden" Path="assignBaaHidden"/>
+                                    <Annotation Term="UI.Importance" EnumMember="UI.ImportanceType/High"/>
+                                </Record>
+                                <Record Type="UI.DataFieldForAction">
+                                    <PropertyValue Property="Action" String="cm_cdservice.assignDev"/>
+                                    <PropertyValue Property="Label" String="Assign Developer"/>
+                                    <Annotation Term="UI.Hidden" Path="assignDevHidden"/>
+                                    <Annotation Term="UI.Importance" EnumMember="UI.ImportanceType/High"/>
+                                </Record>
+                                <Record Type="UI.DataFieldForAction">
+                                    <PropertyValue Property="Action" String="cm_cdservice.updateCustStatus"/>
+                                    <PropertyValue Property="Label" String="Update Cust Status"/>
+                                    <Annotation Term="UI.Hidden" Path="updateCustHidden"/>
+                                    <Annotation Term="UI.Importance" EnumMember="UI.ImportanceType/High"/>
+                                </Record>
+                                <Record Type="UI.DataFieldForAction">
+                                    <PropertyValue Property="Action" String="cm_cdservice.updateWorkStatus"/>
+                                    <PropertyValue Property="Label" String="Update Work Status"/>
+                                    <Annotation Term="UI.Hidden" Path="updateWorkHidden"/>
+                                    <Annotation Term="UI.Importance" EnumMember="UI.ImportanceType/High"/>
+                                </Record>
+                                <Record Type="UI.DataField">
+                                    <PropertyValue Property="Value" Path="cdid"/>
+                                </Record>
+                                <Record Type="UI.DataField">
+                                    <PropertyValue Property="Value" Path="cdDesc"/>
+                                </Record>
+                                <Record Type="UI.DataField">
+                                    <PropertyValue Property="Value" Path="gcm"/>
+                                </Record>
+                                <Record Type="UI.DataField">
+                                    <PropertyValue Property="Value" Path="overallStatus"/>
+                                </Record>
+                                <Record Type="UI.DataField">
+                                    <PropertyValue Property="Value" Path="baa"/>
+                                </Record>
+                                <Record Type="UI.DataField">
+                                    <PropertyValue Property="Value" Path="custStatus"/>
+                                </Record>
+                                <Record Type="UI.DataField">
+                                    <PropertyValue Property="Value" Path="developer"/>
+                                </Record>
+                                <Record Type="UI.DataField">
+                                    <PropertyValue Property="Value" Path="workStatus"/>
+                                </Record>
+                            </Collection>
+                        </Annotation>
+                        <Annotation Term="UI.Facets">
+                            <Collection>
+                                <Record Type="UI.ReferenceFacet">
+                                    <PropertyValue Property="Label" String="{i18n>PIC}"/>
+                                        <PropertyValue Property="Target" AnnotationPath="@UI.FieldGroup#PIC"/>
+                                    </Record>
+                                    <Record Type="UI.ReferenceFacet">
+                                        <PropertyValue Property="Label" String="{i18n>Admin}"/>
+                                            <PropertyValue Property="Target" AnnotationPath="@UI.FieldGroup#Admin"/>
+                                        </Record>
+                                        <Record Type="UI.ReferenceFacet">
+                                            <PropertyValue Property="Label" String="{i18n>TRList}"/>
+                                                <PropertyValue Property="Target" AnnotationPath="transportlist/@UI.LineItem"/>
+                                            </Record>
+                                        </Collection>
+                                    </Annotation>
+                                    <Annotation Term="UI.FieldGroup" Qualifier="Admin">
+                                        <Record Type="UI.FieldGroupType">
+                                            <PropertyValue Property="Data">
+                                                <Collection>
+                                                    <Record Type="UI.DataField">
+                                                        <PropertyValue Property="Value" Path="gcm"/>
+                                                    </Record>
+                                                    <Record Type="UI.DataField">
+                                                        <PropertyValue Property="Value" Path="baa"/>
+                                                    </Record>
+                                                    <Record Type="UI.DataField">
+                                                        <PropertyValue Property="Value" Path="developer"/>
+                                                    </Record>
+                                                    <Record Type="UI.DataField">
+                                                        <PropertyValue Property="Value" Path="overallStatus"/>
+                                                    </Record>
+                                                </Collection>
+                                            </PropertyValue>
+                                        </Record>
+                                    </Annotation>
+                                    <Annotation Term="UI.FieldGroup" Qualifier="PIC">
+                                        <Record Type="UI.FieldGroupType">
+                                            <PropertyValue Property="Data">
+                                                <Collection>
+                                                    <Record Type="UI.DataField">
+                                                        <PropertyValue Property="Value" Path="custStatus"/>
+                                                    </Record>
+                                                    <Record Type="UI.DataField">
+                                                        <PropertyValue Property="Value" Path="workStatus"/>
+                                                    </Record>
+                                                </Collection>
+                                            </PropertyValue>
+                                        </Record>
+                                    </Annotation>
+                                </Annotations>
+                                <Annotations Target="cm_cdservice.EntityContainer/withdrawalCD">
+                                    <Annotation Term="Capabilities.InsertRestrictions">
+                                        <Record Type="Capabilities.InsertRestrictionsType">
+                                            <PropertyValue Property="Insertable" Bool="true"/>
+                                        </Record>
+                                    </Annotation>
+                                    <Annotation Term="Capabilities.UpdateRestrictions">
+                                        <Record Type="Capabilities.UpdateRestrictionsType">
+                                            <PropertyValue Property="Updatable" Bool="false"/>
+                                        </Record>
+                                    </Annotation>
+                                    <Annotation Term="Capabilities.DeleteRestrictions">
+                                        <Record Type="Capabilities.DeleteRestrictionsType">
+                                            <PropertyValue Property="Deletable" Bool="true"/>
+                                        </Record>
+                                    </Annotation>
+                                </Annotations>
+                                <Annotations Target="cm_cdservice.withdrawalCD/ID">
+                                    <Annotation Term="UI.Hidden" Bool="true"/>
+                                </Annotations>
+                                <Annotations Target="cm_cdservice.withdrawalCD/createdAt">
+                                    <Annotation Term="UI.Hidden" Bool="true"/>
+                                    <Annotation Term="UI.HiddenFilter" Bool="true"/>
+                                    <Annotation Term="Core.Immutable" Bool="true"/>
+                                    <Annotation Term="Core.Computed" Bool="true"/>
+                                    <Annotation Term="Common.Label" String="{i18n>CreatedAt}"/>
+                                    </Annotations>
+                                    <Annotations Target="cm_cdservice.withdrawalCD/createdBy">
+                                        <Annotation Term="UI.Hidden" Bool="true"/>
+                                        <Annotation Term="UI.HiddenFilter" Bool="true"/>
+                                        <Annotation Term="Core.Immutable" Bool="true"/>
+                                        <Annotation Term="Core.Computed" Bool="true"/>
+                                        <Annotation Term="Core.Description" String="{i18n>UserID.Description}"/>
+                                            <Annotation Term="Common.Label" String="{i18n>CreatedBy}"/>
+                                            </Annotations>
+                                            <Annotations Target="cm_cdservice.withdrawalCD/modifiedAt">
+                                                <Annotation Term="UI.Hidden" Bool="true"/>
+                                                <Annotation Term="UI.HiddenFilter" Bool="true"/>
+                                                <Annotation Term="Core.Computed" Bool="true"/>
+                                                <Annotation Term="Common.Label" String="{i18n>ChangedAt}"/>
+                                                </Annotations>
+                                                <Annotations Target="cm_cdservice.withdrawalCD/modifiedBy">
+                                                    <Annotation Term="UI.Hidden" Bool="true"/>
+                                                    <Annotation Term="UI.HiddenFilter" Bool="true"/>
+                                                    <Annotation Term="Core.Computed" Bool="true"/>
+                                                    <Annotation Term="Core.Description" String="{i18n>UserID.Description}"/>
+                                                        <Annotation Term="Common.Label" String="{i18n>ChangedBy}"/>
+                                                        </Annotations>
+                                                        <Annotations Target="cm_cdservice.withdrawalCD/cdid">
+                                                            <Annotation Term="Common.Label" String="{i18n>CDID}"/>
+                                                            </Annotations>
+                                                            <Annotations Target="cm_cdservice.withdrawalCD/cdDesc">
+                                                                <Annotation Term="Common.Label" String="{i18n>CDDesc}"/>
+                                                                </Annotations>
+                                                                <Annotations Target="cm_cdservice.withdrawalCD/overallStatus">
+                                                                    <Annotation Term="Common.Label" String="{i18n>OStatus}"/>
+                                                                    </Annotations>
+                                                                    <Annotations Target="cm_cdservice.withdrawalCD/baa">
+                                                                        <Annotation Term="Common.Label" String="{i18n>Baa}"/>
+                                                                        </Annotations>
+                                                                        <Annotations Target="cm_cdservice.withdrawalCD/baaEmail">
+                                                                            <Annotation Term="UI.Hidden" Bool="true"/>
+                                                                        </Annotations>
+                                                                        <Annotations Target="cm_cdservice.withdrawalCD/developer">
+                                                                            <Annotation Term="Common.Label" String="{i18n>Developer}"/>
+                                                                            </Annotations>
+                                                                            <Annotations Target="cm_cdservice.withdrawalCD/devEmail">
+                                                                                <Annotation Term="UI.Hidden" Bool="true"/>
+                                                                            </Annotations>
+                                                                            <Annotations Target="cm_cdservice.withdrawalCD/gcm">
+                                                                                <Annotation Term="Common.Label" String="{i18n>GCM}"/>
+                                                                                </Annotations>
+                                                                                <Annotations Target="cm_cdservice.withdrawalCD/gcmEmail">
+                                                                                    <Annotation Term="UI.Hidden" Bool="true"/>
+                                                                                </Annotations>
+                                                                                <Annotations Target="cm_cdservice.withdrawalCD/custStatus">
+                                                                                    <Annotation Term="Common.Label" String="{i18n>CStatus}"/>
+                                                                                    </Annotations>
+                                                                                    <Annotations Target="cm_cdservice.withdrawalCD/workStatus">
+                                                                                        <Annotation Term="Common.Label" String="{i18n>WStatus}"/>
+                                                                                        </Annotations>
+                                                                                        <Annotations Target="cm_cdservice.withdrawalCD/assignBaaHidden">
+                                                                                            <Annotation Term="Core.Computed" Bool="true"/>
+                                                                                        </Annotations>
+                                                                                        <Annotations Target="cm_cdservice.withdrawalCD/assignDevHidden">
+                                                                                            <Annotation Term="Core.Computed" Bool="true"/>
+                                                                                        </Annotations>
+                                                                                        <Annotations Target="cm_cdservice.withdrawalCD/updateCustHidden">
+                                                                                            <Annotation Term="Core.Computed" Bool="true"/>
+                                                                                        </Annotations>
+                                                                                        <Annotations Target="cm_cdservice.withdrawalCD/updateWorkHidden">
+                                                                                            <Annotation Term="Core.Computed" Bool="true"/>
+                                                                                        </Annotations>
+                                                                                        <Annotations Target="cm_cdservice.assignBAA(cm_cdservice.withdrawalCD)/newBaa">
+                                                                                            <Annotation Term="Common.ValueListWithFixedValues" Bool="false"/>
+                                                                                            <Annotation Term="Common.ValueList">
+                                                                                                <Record Type="Common.ValueListType">
+                                                                                                    <PropertyValue Property="Label" String="{i18n>User}"/>
+                                                                                                        <PropertyValue Property="CollectionPath" String="users"/>
+                                                                                                        <PropertyValue Property="Parameters">
+                                                                                                            <Collection>
+                                                                                                                <Record Type="Common.ValueListParameterInOut">
+                                                                                                                    <PropertyValue Property="ValueListProperty" String="userid"/>
+                                                                                                                    <PropertyValue Property="LocalDataProperty" PropertyPath="newBaa"/>
+                                                                                                                </Record>
+                                                                                                                <Record Type="Common.ValueListParameterDisplayOnly">
+                                                                                                                    <PropertyValue Property="ValueListProperty" String="fullname"/>
+                                                                                                                </Record>
+                                                                                                            </Collection>
+                                                                                                        </PropertyValue>
+                                                                                                    </Record>
+                                                                                                </Annotation>
+                                                                                                <Annotation Term="Common.Label" String="{i18n>newBAA}"/>
+                                                                                                </Annotations>
+                                                                                                <Annotations Target="cm_cdservice.assignDev(cm_cdservice.withdrawalCD)/newDev">
+                                                                                                    <Annotation Term="Common.ValueListWithFixedValues" Bool="false"/>
+                                                                                                    <Annotation Term="Common.ValueList">
+                                                                                                        <Record Type="Common.ValueListType">
+                                                                                                            <PropertyValue Property="Label" String="{i18n>User}"/>
+                                                                                                                <PropertyValue Property="CollectionPath" String="users"/>
+                                                                                                                <PropertyValue Property="Parameters">
+                                                                                                                    <Collection>
+                                                                                                                        <Record Type="Common.ValueListParameterInOut">
+                                                                                                                            <PropertyValue Property="ValueListProperty" String="userid"/>
+                                                                                                                            <PropertyValue Property="LocalDataProperty" PropertyPath="newDev"/>
+                                                                                                                        </Record>
+                                                                                                                        <Record Type="Common.ValueListParameterDisplayOnly">
+                                                                                                                            <PropertyValue Property="ValueListProperty" String="fullname"/>
+                                                                                                                        </Record>
+                                                                                                                    </Collection>
+                                                                                                                </PropertyValue>
+                                                                                                            </Record>
+                                                                                                        </Annotation>
+                                                                                                        <Annotation Term="Common.Label" String="{i18n>newDev}"/>
+                                                                                                        </Annotations>
+                                                                                                        <Annotations Target="cm_cdservice.transportreq">
+                                                                                                            <Annotation Term="UI.HeaderInfo">
+                                                                                                                <Record Type="UI.HeaderInfoType">
+                                                                                                                    <PropertyValue Property="TypeName" String="{i18n>TR}"/>
+                                                                                                                        <PropertyValue Property="TypeNamePlural" String="{i18n>TRs}"/>
+                                                                                                                            <PropertyValue Property="Title">
+                                                                                                                                <Record Type="UI.DataField">
+                                                                                                                                    <PropertyValue Property="Value" Path="transportnum"/>
+                                                                                                                                </Record>
+                                                                                                                            </PropertyValue>
+                                                                                                                        </Record>
+                                                                                                                    </Annotation>
+                                                                                                                    <Annotation Term="UI.LineItem">
+                                                                                                                        <Collection>
+                                                                                                                            <Record Type="UI.DataField">
+                                                                                                                                <PropertyValue Property="Value" Path="transportnum"/>
+                                                                                                                            </Record>
+                                                                                                                            <Record Type="UI.DataField">
+                                                                                                                                <PropertyValue Property="Value" Path="resp_user"/>
+                                                                                                                            </Record>
+                                                                                                                            <Record Type="UI.DataField">
+                                                                                                                                <PropertyValue Property="Value" Path="trfunction"/>
+                                                                                                                            </Record>
+                                                                                                                            <Record Type="UI.DataField">
+                                                                                                                                <PropertyValue Property="Value" Path="status"/>
+                                                                                                                            </Record>
+                                                                                                                        </Collection>
+                                                                                                                    </Annotation>
+                                                                                                                    <Annotation Term="UI.Facets">
+                                                                                                                        <Collection>
+                                                                                                                            <Record Type="UI.ReferenceFacet">
+                                                                                                                                <PropertyValue Property="Label" String="{i18n>TRInfo}"/>
+                                                                                                                                    <PropertyValue Property="Target" AnnotationPath="@UI.FieldGroup#TRInfo"/>
+                                                                                                                                </Record>
+                                                                                                                            </Collection>
+                                                                                                                        </Annotation>
+                                                                                                                        <Annotation Term="UI.FieldGroup" Qualifier="TRInfo">
+                                                                                                                            <Record Type="UI.FieldGroupType">
+                                                                                                                                <PropertyValue Property="Data">
+                                                                                                                                    <Collection>
+                                                                                                                                        <Record Type="UI.DataField">
+                                                                                                                                            <PropertyValue Property="Value" Path="resp_user"/>
+                                                                                                                                        </Record>
+                                                                                                                                        <Record Type="UI.DataField">
+                                                                                                                                            <PropertyValue Property="Value" Path="trfunction"/>
+                                                                                                                                        </Record>
+                                                                                                                                        <Record Type="UI.DataField">
+                                                                                                                                            <PropertyValue Property="Value" Path="status"/>
+                                                                                                                                        </Record>
+                                                                                                                                    </Collection>
+                                                                                                                                </PropertyValue>
+                                                                                                                            </Record>
+                                                                                                                        </Annotation>
+                                                                                                                    </Annotations>
+                                                                                                                    <Annotations Target="cm_cdservice.transportreq/ID">
+                                                                                                                        <Annotation Term="UI.Hidden" Bool="true"/>
+                                                                                                                    </Annotations>
+                                                                                                                    <Annotations Target="cm_cdservice.transportreq/createdAt">
+                                                                                                                        <Annotation Term="UI.Hidden" Bool="true"/>
+                                                                                                                        <Annotation Term="UI.HiddenFilter" Bool="true"/>
+                                                                                                                        <Annotation Term="Core.Immutable" Bool="true"/>
+                                                                                                                        <Annotation Term="Core.Computed" Bool="true"/>
+                                                                                                                        <Annotation Term="Common.Label" String="{i18n>CreatedAt}"/>
+                                                                                                                        </Annotations>
+                                                                                                                        <Annotations Target="cm_cdservice.transportreq/createdBy">
+                                                                                                                            <Annotation Term="UI.Hidden" Bool="true"/>
+                                                                                                                            <Annotation Term="UI.HiddenFilter" Bool="true"/>
+                                                                                                                            <Annotation Term="Core.Immutable" Bool="true"/>
+                                                                                                                            <Annotation Term="Core.Computed" Bool="true"/>
+                                                                                                                            <Annotation Term="Core.Description" String="{i18n>UserID.Description}"/>
+                                                                                                                                <Annotation Term="Common.Label" String="{i18n>CreatedBy}"/>
+                                                                                                                                </Annotations>
+                                                                                                                                <Annotations Target="cm_cdservice.transportreq/modifiedAt">
+                                                                                                                                    <Annotation Term="UI.Hidden" Bool="true"/>
+                                                                                                                                    <Annotation Term="UI.HiddenFilter" Bool="true"/>
+                                                                                                                                    <Annotation Term="Core.Computed" Bool="true"/>
+                                                                                                                                    <Annotation Term="Common.Label" String="{i18n>ChangedAt}"/>
+                                                                                                                                    </Annotations>
+                                                                                                                                    <Annotations Target="cm_cdservice.transportreq/modifiedBy">
+                                                                                                                                        <Annotation Term="UI.Hidden" Bool="true"/>
+                                                                                                                                        <Annotation Term="UI.HiddenFilter" Bool="true"/>
+                                                                                                                                        <Annotation Term="Core.Computed" Bool="true"/>
+                                                                                                                                        <Annotation Term="Core.Description" String="{i18n>UserID.Description}"/>
+                                                                                                                                            <Annotation Term="Common.Label" String="{i18n>ChangedBy}"/>
+                                                                                                                                            </Annotations>
+                                                                                                                                            <Annotations Target="cm_cdservice.transportreq/transportnum">
+                                                                                                                                                <Annotation Term="Common.Label" String="{i18n>TRNum}"/>
+                                                                                                                                                </Annotations>
+                                                                                                                                                <Annotations Target="cm_cdservice.transportreq/resp_user">
+                                                                                                                                                    <Annotation Term="Common.Label" String="{i18n>RespUser}"/>
+                                                                                                                                                    </Annotations>
+                                                                                                                                                    <Annotations Target="cm_cdservice.transportreq/trfunction">
+                                                                                                                                                        <Annotation Term="Common.Label" String="{i18n>TRFunc}"/>
+                                                                                                                                                        </Annotations>
+                                                                                                                                                        <Annotations Target="cm_cdservice.transportreq/status">
+                                                                                                                                                            <Annotation Term="Common.Label" String="{i18n>TRStatus}"/>
+                                                                                                                                                            </Annotations>
+                                                                                                                                                        </Schema>
+                                                                                                                                                    </edmx:DataServices>
+                                                                                                                                                </edmx:Edmx>
