@@ -1,5 +1,6 @@
 const { executeHttpRequest } = require('@sap-cloud-sdk/core');
 cds.env.odata.protectMetadata = false
+const sendMail = require('./libs/sendMail.js')
 
 module.exports = (srv) => {
     const { withdrawalCD, transportreq } = srv.entities;
@@ -14,7 +15,7 @@ module.exports = (srv) => {
             for (let i of result.entries()) {
 
                 if (!is_developer) {
-                    console.log("Setting dev options hidden for CD:", i[1].cdid,);
+                    console.log("Setting dev options hidden for CD:", i[1].cdid);
                     i[1].assignDevEnabled = false;
                     i[1].updateWorkEnabled = false;
                 }
@@ -28,7 +29,7 @@ module.exports = (srv) => {
         } else {
 
             if (!is_developer) {
-                console.log("Setting dev options hidden for CD:", result.cdid,);
+                console.log("Setting dev options hidden for CD:", result.cdid);
                 result.assignDevEnabled = true;
                 result.updateWorkEnabled = true;
             }
@@ -56,30 +57,7 @@ module.exports = (srv) => {
                 req.info(`Update CD ${selectedCD} completed, please refresh to view the updated data`);
             }
         }
-
-        var baapayload = {
-            "sender": "sapcoebtpgeneral@ppg.com",
-            "recipient": req.data.newEmail,
-            "subject": `CD ${selectedCD} to be withdrawn`,
-            "body": `You have been assigned to reverse customizing changes implemented in CD ${selectedCD}.`
-        }
-
-        try {
-            await executeHttpRequest(
-                {
-                    destinationName: "Mail_Service_API"
-                },
-                {
-                    method: 'POST',
-                    data: baapayload,
-                    url: "/mailrequests"
-                }
-            )
-        }
-        catch (error) {
-            console.log("Error occured during mail sending, kindly check at mail service");
-        }
-
+        await sendMail("baa", selectedCD, req.data.newEmail);
     })
 
     srv.on('assignDev', async (req) => {
@@ -91,34 +69,12 @@ module.exports = (srv) => {
             if (selectresult.developer == req.data.newDev) {
                 //do nothing
             } else {
-                let updatequery = UPDATE(withdrawalCD, { cdid: selectedCD }).set({ developer: req.data.newDev, devEmail : req.data.newEmail });
+                let updatequery = UPDATE(withdrawalCD, { cdid: selectedCD }).set({ developer: req.data.newDev, devEmail: req.data.newEmail });
                 await cds.run(updatequery);
                 req.info(`Update CD ${selectedCD} completed, please refresh to view the updated data`);
             }
         }
-
-        var devpayload = {
-            "sender": "sapcoebtpgeneral@ppg.com",
-            "recipient": req.data.newEmail,
-            "subject": `CD ${selectedCD} to be withdrawn`,
-            "body": `You have been assigned to reverse workbench changes implemented in CD ${selectedCD}.`
-        }
-
-        try {
-            await executeHttpRequest(
-                {
-                    destinationName: "Mail_Service_API"
-                },
-                {
-                    method: 'POST',
-                    data: devpayload,
-                    url: "/mailrequests"
-                }
-            )
-        }
-        catch (error) {
-            console.log("Error occured during mail sending, kindly check at mail service");
-        }
+        await sendMail("dev", selectedCD, req.data.newEmail);
     })
 
     srv.on('updateCustStatus', async (req) => {
@@ -137,28 +93,7 @@ module.exports = (srv) => {
         req.info(`Update CD ${selectedCD} completed, please refresh to view the updated data`);
 
         if ((overallStatus == "Completed") & selectresult[0].gcmEmail != "") {
-            var payload = {
-                "sender": "sapcoebtpgeneral@ppg.com",
-                "recipient": gcmEmail,
-                "subject": "CD Ready for Withdrawal",
-                "body": `Changes for CD ${selectedCD} have been completed reversed. The CD can now be withdrawn in SOLMAN.`
-            }
-
-            try {
-                await executeHttpRequest(
-                    {
-                        destinationName: "Mail_Service_API"
-                    },
-                    {
-                        method: 'POST',
-                        data: payload,
-                        url: "/mailrequests"
-                    }
-                )
-            }
-            catch (error) {
-                console.log("Error occured during mail sending, kindly check at mail service");
-            }
+            await sendMail("gcm", selectedCD, gcmEmail);
         }
 
     })
@@ -168,7 +103,7 @@ module.exports = (srv) => {
         const completeStatus = "Completed"
         const overallStatus = "InProgress";
 
-        let selectcdquery = SELECT.from(withdrawalCD).columns("custStatus","gcmEmail").where({ cdid: selectedCD });
+        let selectcdquery = SELECT.from(withdrawalCD).columns("custStatus", "gcmEmail").where({ cdid: selectedCD });
         selectresult = await cds.run(selectcdquery);
 
         if (selectresult.custStatus == "Completed") {
@@ -178,25 +113,8 @@ module.exports = (srv) => {
         await cds.run(updatequery);
         req.info(`Update CD ${selectedCD} completed, please refresh to view the updated data`);
 
-        if((overallStatus == "Completed") & selectresult[0].gcmEmail != ""){
-            var payload = {
-                "sender": "sapcoebtpgeneral@ppg.com",
-                "recipient": gcmEmail,
-                "subject": "CD Ready for Withdrawal",
-                "body": `A notification that changes for CD ${selectedCD} have been completed reversed. The CD can now be withdrawn in SOLMAN.`
-            }
-
-            const response = await executeHttpRequest(
-                {
-                    destinationName: "Mail_Service_API"
-                },
-                {
-                    method: 'POST',
-                    data: payload,
-                    url: "/mailrequests"
-                }
-            );
-            console.log(response.data);
+        if ((overallStatus == "Completed") & selectresult[0].gcmEmail != "") {
+            await sendMail("gcm", selectedCD, gcmEmail);
         }
     })
 
@@ -250,13 +168,13 @@ module.exports = (srv) => {
                 if (trEntry[1].trfunction == 'K') {
                     baa = trEntry[1].resp_user;
                     baaEmail = trEntry[1].userEmail;
-                    if(trEntry[1].status == "InProgress"){
+                    if (trEntry[1].status == "InProgress") {
                         overallStatus = custStatus = "InProgress";
                     }
                 } else if (trEntry[1].trfunction == 'W') {
                     developer = trEntry[1].resp_user;
                     devEmail = trEntry[1].userEmail;
-                    if(trEntry[1].status == "InProgress"){
+                    if (trEntry[1].status == "InProgress") {
                         overallStatus = workStatus = "InProgress";
                     }
                 }
@@ -292,78 +210,37 @@ module.exports = (srv) => {
             }
 
             //update CD PIC + Status
-            let updatepicquery = UPDATE(withdrawalCD, { cdid: inputCD.cdid }).set({ baa: baa, developer: developer, baaEmail: baaEmail, devEmail: devEmail,
-                                                                                    overallStatus: overallStatus, custStatus : custStatus, workStatus: workStatus });
+            let updatepicquery = UPDATE(withdrawalCD, { cdid: inputCD.cdid }).set({
+                baa: baa, developer: developer, baaEmail: baaEmail, devEmail: devEmail,
+                overallStatus: overallStatus, custStatus: custStatus, workStatus: workStatus
+            });
             await cds.run(updatepicquery);
 
             //send email ONLY if PICs are different
             let sendBaa, sendDev;
 
-            console.log("Action is:",action)
+            console.log("Action is:", action)
 
             if (action == "Insert") {
                 sendBaa = sendDev = true;
             } else if (action == "Update") {
                 if ((baa != selectcdresult[0].baa) & (inputCD.baaEmail != "")) {
-                    console.log("Old BAA:",baa,"whereas NewBAA:",selectcdresult[0].baa)
                     sendBaa = true;
                 }
                 if ((developer != selectcdresult[0].developer) & (inputCD.devEmail != "")) {
-                    console.log("Old Developer:",developer,"whereas New Developer:",selectcdresult[0].developer)
                     sendDev = true;
                 }
             }
 
-            var baapayload = {
-                "sender": "sapcoebtpgeneral@ppg.com",
-                "recipient": baaEmail,
-                "subject": `CD ${inputCD.cdid} to be withdrawn`,
-                "body": `You have been assigned to reverse customizing changes implemented in CD ${inputCD.cdid}.`
-            }
-
-            var devpayload = {
-                "sender": "sapcoebtpgeneral@ppg.com",
-                "recipient": devEmail,
-                "subject": `CD ${inputCD.cdid} to be withdrawn`,
-                "body": `You have been assigned to reverse workbench changes implemented in CD ${inputCD.cdid}.`
-            }
-
             if (sendBaa == true) {
                 console.log("Sending email to BAA")
-                try {
-                    await executeHttpRequest(
-                        {
-                            destinationName: "Mail_Service_API"
-                        },
-                        {
-                            method: 'POST',
-                            data: baapayload,
-                            url: "/mailrequests"
-                        }
-                    )
-                }
-                catch (error) {
-                    console.log("Error occured during mail sending, kindly check at mail service");
-                }
+                await sendMail("baa", inputCD.cdid, baaEmail);
+
             }
 
             if (sendDev == true) {
                 console.log("Sending email to developer")
-                try {
-                    await executeHttpRequest(
-                        {
-                            destinationName: "Mail_Service_API"
-                        },
-                        {
-                            method: 'POST',
-                            data: devpayload,
-                            url: "/mailrequests"
-                        }
-                    )
-                }
-                catch (error) {
-                    console.log("Error occured during mail sending, kindly check at mail service");
-                }
+                await sendMail("dev", inputCD.cdid, devEmail);
             }
 
         }
