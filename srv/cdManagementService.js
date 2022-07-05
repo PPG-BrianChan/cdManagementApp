@@ -1,4 +1,5 @@
 const { executeHttpRequest } = require('@sap-cloud-sdk/core');
+cds.env.odata.protectMetadata = false
 
 module.exports = (srv) => {
     const { withdrawalCD, transportreq } = srv.entities;
