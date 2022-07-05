@@ -27,7 +27,6 @@ annotate cm.withdrawalCD with @UI : {
         Description    : {Value : cdDesc}
     },
     SelectionFields   : [
-        // req_no,
         cdid,
         gcm,
         baa,
@@ -38,26 +37,22 @@ annotate cm.withdrawalCD with @UI : {
         {
             $Type  : 'UI.DataFieldForAction',
             Action : 'cm_cdservice.assignBAA',
-            Label  : 'Assign BAA',
-        // ![@UI.Hidden]        : assignBaaHidden
+            Label  : 'Assign BAA'
         },
         {
             $Type  : 'UI.DataFieldForAction',
             Action : 'cm_cdservice.assignDev',
-            Label  : 'Assign Developer',
-        // ![@UI.Hidden]        : assignDevHidden
+            Label  : 'Assign Developer'
         },
         {
             $Type  : 'UI.DataFieldForAction',
             Action : 'cm_cdservice.updateCustStatus',
-            Label  : 'Update Cust Status',
-        // ![@UI.Hidden]        : updateCustHidden,
+            Label  : 'Update Cust Status'
         },
         {
             $Type  : 'UI.DataFieldForAction',
             Action : 'cm_cdservice.updateWorkStatus',
-            Label  : 'Update Work Status',
-        // ![@UI.Hidden]        : updateWorkHidden,
+            Label  : 'Update Work Status'
         },
         {
             $Type : 'UI.DataField',
@@ -214,7 +209,7 @@ annotate cm_cdservice.withdrawalCD actions {
         }
     }
     @title                           : '{i18n>newBAA}'
-    newBaa, 
+    newBaa,
     @UI.Hidden
     newEmail);
     @Common                          : {SideEffects : {
@@ -252,9 +247,18 @@ annotate cm_cdservice.withdrawalCD actions {
     @UI.Hidden
     newEmail);
 
+    @Common                          : {SideEffects : {
+        $Type          : 'Common.SideEffectsType',
+        TargetEntities : [_it],
+    }, }
     @cds.odata.bindingparameter.name : '_it'
     @Core.OperationAvailable         : _it.updateCustEnabled
     updateCustStatus;
+
+    @Common                          : {SideEffects : {
+        $Type          : 'Common.SideEffectsType',
+        TargetEntities : [_it],
+    }, }
     @cds.odata.bindingparameter.name : '_it'
     @Core.OperationAvailable         : _it.updateWorkEnabled
     updateWorkStatus

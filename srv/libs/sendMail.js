@@ -1,3 +1,5 @@
+const { executeHttpRequest } = require('@sap-cloud-sdk/core');
+
 module.exports = async function (mailfunction, cdid, recipient) {
 
     var baapayload = {
@@ -26,15 +28,12 @@ module.exports = async function (mailfunction, cdid, recipient) {
     console.log(mailfunction, typeof mailfunction)
     switch (mailfunction) {
         case "baa":
-            console.log("IN BAA")
             payload = baapayload;
             break;
         case "dev":
-            console.log("IN DEV")
             payload = devpayload;
             break;
         case "gcm":
-            console.log("IN GCM")
             payload = gcmpayload;
             break;
     }
@@ -46,7 +45,7 @@ module.exports = async function (mailfunction, cdid, recipient) {
             },
             {
                 method: 'POST',
-                data: devpayload,
+                data: payload,
                 url: "/mailrequests"
             }
         )

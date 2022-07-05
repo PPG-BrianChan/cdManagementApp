@@ -1,4 +1,3 @@
-const { executeHttpRequest } = require('@sap-cloud-sdk/core');
 cds.env.odata.protectMetadata = false
 const sendMail = require('./libs/sendMail.js')
 
@@ -6,7 +5,7 @@ module.exports = (srv) => {
     const { withdrawalCD, transportreq } = srv.entities;
 
     srv.after('READ', 'withdrawalCD', (result, req) => {
-        console.log('[AFTER READ]')
+        console.log("Event is: After READ")
 
         is_developer = req.user.is("developer");
         is_baa = req.user.is("baa");
@@ -15,13 +14,11 @@ module.exports = (srv) => {
             for (let i of result.entries()) {
 
                 if (!is_developer) {
-                    console.log("Setting dev options hidden for CD:", i[1].cdid);
                     i[1].assignDevEnabled = false;
                     i[1].updateWorkEnabled = false;
                 }
 
                 if (!is_baa) {
-                    console.log("Setting cust option hidden for CD:", i[1].cdid);
                     i[1].assignBaaEnabled = false;
                     i[1].updateCustEnabled = false;
                 }
@@ -29,21 +26,19 @@ module.exports = (srv) => {
         } else {
 
             if (!is_developer) {
-                console.log("Setting dev options hidden for CD:", result.cdid);
                 result.assignDevEnabled = true;
                 result.updateWorkEnabled = true;
             }
 
             if (!is_baa) {
-                console.log("Setting cust option hidden for CD:", result.cdid);
                 result.assignBaaEnabled = true;
                 result.updateCustEnabled = true;
             }
         }
-        console.log(result)
     })
 
     srv.on('assignBAA', async (req) => {
+        console.log("Event is: Assign BAA")
         const selectedCD = req.params[0].cdid;
         let selectcdquery = SELECT.from(withdrawalCD).columns("baa").where({ cdid: selectedCD });
         selectresult = await cds.run(selectcdquery);
@@ -54,13 +49,13 @@ module.exports = (srv) => {
             } else {
                 let updatequery = UPDATE(withdrawalCD, { cdid: selectedCD }).set({ baa: req.data.newBaa, baaEmail: req.data.newEmail });
                 await cds.run(updatequery);
-                req.info(`Update CD ${selectedCD} completed, please refresh to view the updated data`);
             }
         }
         await sendMail("baa", selectedCD, req.data.newEmail);
     })
 
     srv.on('assignDev', async (req) => {
+        console.log("Event is: Assign Dev")
         const selectedCD = req.params[0].cdid;
         let selectcdquery = SELECT.from(withdrawalCD).columns("developer").where({ cdid: selectedCD });
         selectresult = await cds.run(selectcdquery);
@@ -71,13 +66,13 @@ module.exports = (srv) => {
             } else {
                 let updatequery = UPDATE(withdrawalCD, { cdid: selectedCD }).set({ developer: req.data.newDev, devEmail: req.data.newEmail });
                 await cds.run(updatequery);
-                req.info(`Update CD ${selectedCD} completed, please refresh to view the updated data`);
             }
         }
         await sendMail("dev", selectedCD, req.data.newEmail);
     })
 
     srv.on('updateCustStatus', async (req) => {
+        console.log("Event is: Update Cust Status")
         const selectedCD = req.params[0].cdid;
         const completeStatus = "Completed"
         const overallStatus = "InProgress";
@@ -90,7 +85,6 @@ module.exports = (srv) => {
         }
         let updatequery = UPDATE(withdrawalCD, { cdid: selectedCD }).set({ custStatus: completeStatus, overallStatus: overallStatus });
         await cds.run(updatequery);
-        req.info(`Update CD ${selectedCD} completed, please refresh to view the updated data`);
 
         if ((overallStatus == "Completed") & selectresult[0].gcmEmail != "") {
             await sendMail("gcm", selectedCD, gcmEmail);
@@ -99,6 +93,7 @@ module.exports = (srv) => {
     })
 
     srv.on('updateWorkStatus', async (req) => {
+        console.log("Event is: Update Work Status")
         const selectedCD = req.params[0].cdid;
         const completeStatus = "Completed"
         const overallStatus = "InProgress";
@@ -111,7 +106,6 @@ module.exports = (srv) => {
         }
         let updatequery = UPDATE(withdrawalCD, { cdid: selectedCD }).set({ workStatus: completeStatus, overallStatus: overallStatus });
         await cds.run(updatequery);
-        req.info(`Update CD ${selectedCD} completed, please refresh to view the updated data`);
 
         if ((overallStatus == "Completed") & selectresult[0].gcmEmail != "") {
             await sendMail("gcm", selectedCD, gcmEmail);
@@ -119,11 +113,13 @@ module.exports = (srv) => {
     })
 
     srv.on('updateCDList', async (req) => {
+        console.log("Event is: Update CD List")
+        
         for (let cdEntry of req.data.inputcd.entries()) {
             console.log("Processing CD:", cdEntry[1].object_id);
             let baa, developer, gcm, baaEmail, devEmail, gcmEmail;
 
-            //baa and developer to be updated later
+            //baa details & dev details & gcm details & statuses -> will be updated after processing TRs
             let inputCD = {
                 cdid: cdEntry[1].object_id,
                 cdDesc: cdEntry[1].description,
@@ -141,19 +137,17 @@ module.exports = (srv) => {
             let selectcdquery = SELECT.from(withdrawalCD).where({ cdid: inputCD.cdid })
             let selectcdresult = await cds.run(selectcdquery);
 
-
             //insert or  update CD
             let result;
             let action;
             if (selectcdresult.length === 0) {
-                console.log("Inserting data");
+                console.log("Inserting CD");
                 action = "Insert";
                 let insertcdquery = INSERT.into(withdrawalCD).entries(inputCD);
                 result = await cds.run(insertcdquery);
 
-
             } else {
-                console.log("Updating data");
+                console.log("Updating CD");
                 action = "Update";
                 let updatecdquery = UPDATE(withdrawalCD, { cdid: inputCD.cdid }).with(inputCD)
                 result = await cds.run(updatecdquery);
@@ -192,7 +186,7 @@ module.exports = (srv) => {
                 let selecttrresult = await cds.run(selecttrquery);
 
                 if (selecttrresult.length === 0) {
-                    console.log("Inserting data");
+                    console.log("Inserting TR");
                     inputTR.parent_ID = result.req.data.ID;
                     inputTR.parent_cdid = inputCD.cdid;
                     let inserttrquery = INSERT.into(transportreq).entries(inputTR);
@@ -200,8 +194,7 @@ module.exports = (srv) => {
 
 
                 } else {
-                    console.log("Updating data");
-                    console.log(selecttrresult[0].parent_ID);
+                    console.log("Updating TR");
                     inputTR.parent_ID = selecttrresult[0].parent_ID;
                     inputTR.parent_cdid = inputCD.cdid;
                     let updatetrquery = UPDATE(transportreq, { transportnum: inputTR.transportnum }).with(inputTR)
