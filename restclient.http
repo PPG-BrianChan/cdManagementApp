@@ -1,4 +1,12 @@
 ### ------------------------------------------------------------------------
+# Get list
+GET http://localhost:4004/cm-cdservice/withdrawalCD
+
+### ------------------------------------------------------------------------
+# Get TR list
+GET http://localhost:4004/cm-cdservice/transportreq
+
+### ------------------------------------------------------------------------
 # Mass create entity
 # POST http://localhost:4004/cm-cdservice/updateCDList
 POST http://localhost:4004/API/updateCDList
@@ -16,10 +24,28 @@ Content-Type: application/json
         "tr_links": [
             { "originator_id": "ASWW589EGSAQ985EFX#&G8621##56823", "trorder_number": "T15K918390SA", "description": "3001333: Test Change URGENT",
               "sys_type": "ABAP","sys_client": "100", "cts_id": "T15_P00404", "transport_track": "TR000025",
-              "resp_user": "V614944", "userEmail":"cchan@ppg.com", "trfunction": "K", "status": "InProgress" },
+              "resp_user": "V614944", "userEmail":"cchan@ppg.com", "trfunction": "K", "status": "Released" },
             { "originator_id": "ASWW589EGSAQ985EFX#&G8621##56823", "trorder_number": "T15K9999999A", "description": "3001333: Test Change URGENT 2",
               "sys_type": "ABAP","sys_client": "100", "cts_id": "T15_P00404", "transport_track": "TR000025",
-              "resp_user": "S999999", "userEmail":"chiewvoon93@gmail.com", "trfunction": "W", "status": "InProgress" }
+              "resp_user": "S999999", "userEmail":"chiewvoon93@gmail.com", "trfunction": "W", "status": "Released" },
+            { "originator_id": "ASWW589EGSAQ985EFX#&G8621##56823", "trorder_number": "T15K0000001B", "description": "3001333: Test Change URGENT 2",
+              "sys_type": "ABAP","sys_client": "100", "cts_id": "T15_P00404", "transport_track": "TR000025",
+              "resp_user": "S999999", "userEmail":"chiewvoon93@gmail.com", "trfunction": "W", "status": "Released" },
+            { "originator_id": "ASWW589EGSAQ985EFX#&G8621##56823", "trorder_number": "T15K0000001C", "description": "3001333: Test Change URGENT",
+              "sys_type": "ABAP","sys_client": "100", "cts_id": "T15_P00404", "transport_track": "TR000025",
+              "resp_user": "V614944", "userEmail":"cchan@ppg.com", "trfunction": "K", "status": "Released" },
+            { "originator_id": "ASWW589EGSAQ985EFX#&G8621##56823", "trorder_number": "T15K0000002B", "description": "3001333: Test Change URGENT 2",
+              "sys_type": "ABAP","sys_client": "100", "cts_id": "T15_P00404", "transport_track": "TR000025",
+              "resp_user": "S999999", "userEmail":"chiewvoon93@gmail.com", "trfunction": "W", "status": "Released" },
+            { "originator_id": "ASWW589EGSAQ985EFX#&G8621##56823", "trorder_number": "T15K0000003B", "description": "3001333: Test Change URGENT 2",
+              "sys_type": "ABAP","sys_client": "100", "cts_id": "T15_P00404", "transport_track": "TR000025",
+              "resp_user": "S999999", "userEmail":"chiewvoon93@gmail.com", "trfunction": "W", "status": "Released" },
+            { "originator_id": "ASWW589EGSAQ985EFX#&G8621##56823", "trorder_number": "T15K0000002C", "description": "3001333: Test Change URGENT",
+              "sys_type": "ABAP","sys_client": "100", "cts_id": "T15_P00404", "transport_track": "TR000025",
+              "resp_user": "V614944", "userEmail":"cchan@ppg.com", "trfunction": "K", "status": "Released" },
+            { "originator_id": "ASWW589EGSAQ985EFX#&G8621##56823", "trorder_number": "T15K0000004B", "description": "3001333: Test Change URGENT 2",
+              "sys_type": "ABAP","sys_client": "100", "cts_id": "T15_P00404", "transport_track": "TR000025",
+              "resp_user": "S999999", "userEmail":"chiewvoon93@gmail.com", "trfunction": "W", "status": "Modifiable" }
         ]
     },
     {
@@ -33,23 +59,18 @@ Content-Type: application/json
         "tr_links": [
             { "originator_id": "ASWW589EGSAQ985EFX#&G8621##56899", "trorder_number": "T15K911111SA", "description": "3001339: Test Change URGENT",
               "sys_type": "ABAP","sys_client": "100", "cts_id": "T15_P00404", "transport_track": "TR000025",
-              "resp_user": "K817663","userEmail":"cchan@ppg.com", "trfunction": "W", "status": "InProgress" },
+              "resp_user": "K817663","userEmail":"cchan@ppg.com", "trfunction": "W", "status": "Released" },
             { "originator_id": "ASWW589EGSAQ985EFX#&G8621##56899", "trorder_number": "T15K2222222A", "description": "3001339: Test Change URGENT 2",
               "sys_type": "ABAP","sys_client": "100", "cts_id": "T15_P00404", "transport_track": "TR000025",
-              "resp_user": "K817663","userEmail":"cchan@ppg.com", "trfunction": "W", "status": "InProgress" }
+              "resp_user": "K817663","userEmail":"cchan@ppg.com", "trfunction": "W", "status": "Released" },
+            { "originator_id": "ASWW589EGSAQ985EFX#&G8621##56823", "trorder_number": "T15K0000101C", "description": "3001333: Test Change URGENT",
+              "sys_type": "ABAP","sys_client": "100", "cts_id": "T15_P00404", "transport_track": "TR000025",
+              "resp_user": "V614944", "userEmail":"cchan@ppg.com", "trfunction": "K", "status": "Modifiable" },
+            { "originator_id": "ASWW589EGSAQ985EFX#&G8621##56899", "trorder_number": "T15K0000101B", "description": "3001339: Test Change URGENT 2",
+              "sys_type": "ABAP","sys_client": "100", "cts_id": "T15_P00404", "transport_track": "TR000025",
+              "resp_user": "Z644739","userEmail":"cchan@ppg.com", "trfunction": "W", "status": "Modifiable" }
         ]
     }
     ]
 
 }
-
-### ------------------------------------------------------------------------
-# Get list
-GET http://localhost:4004/cm-cdservice/withdrawalCD
-
-### ------------------------------------------------------------------------
-# Get TR list
-GET http://localhost:4004/cm-cdservice/transportreq
-
-
-

@@ -7,7 +7,7 @@ service cm_cdservice {
     @Capabilities.UpdateRestrictions.Updatable  : false
     @(restrict : [
         {grant : 'READ'},
-        {grant : 'DELETE',to : 'Admin'}
+        {grant : 'DELETE',to : 'cdManagement_Admin'}
     ])
     entity withdrawalCD as projection on cm.withdrawalCD actions {
         action assignBAA(newBaa : String, newEmail : String);

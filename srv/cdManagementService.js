@@ -114,18 +114,19 @@ module.exports = (srv) => {
 
     srv.on('updateCDList', async (req) => {
         console.log("Event is: Update CD List")
-        
+
         for (let cdEntry of req.data.inputcd.entries()) {
             console.log("Processing CD:", cdEntry[1].object_id);
             let baa, developer, gcm, baaEmail, devEmail, gcmEmail;
+            let overallStatus, workStatus, custStatus;
 
             //baa details & dev details & gcm details & statuses -> will be updated after processing TRs
             let inputCD = {
                 cdid: cdEntry[1].object_id,
                 cdDesc: cdEntry[1].description,
-                overallStatus: "InProgress",
-                custStatus: "InProgress",
-                workStatus: "InProgress",
+                overallStatus: "",
+                custStatus: "",
+                workStatus: "",
                 baa: baa,
                 developer: developer,
                 baaEmail: baaEmail,
@@ -146,31 +147,31 @@ module.exports = (srv) => {
                 let insertcdquery = INSERT.into(withdrawalCD).entries(inputCD);
                 result = await cds.run(insertcdquery);
 
+                //Set default CD statuses
+                overallStatus = workStatus = custStatus = "InProgress"
             } else {
                 console.log("Updating CD");
                 action = "Update";
                 let updatecdquery = UPDATE(withdrawalCD, { cdid: inputCD.cdid }).with(inputCD)
                 result = await cds.run(updatecdquery);
+
+                //Get existing CD statuses
+                console.log("Mapping old statuses")
+                overallStatus = selectcdresult[0].overallStatus
+                workStatus = selectcdresult[0].workStatus
+                custStatus = selectcdresult[0].custStatus
+                console.log("Old values", overallStatus,workStatus,custStatus)
             }
-
             //Process TR -> Insert or Update TR; Based on the statuses will update CD status as well
-
-            //Default status to success, any TR in progress will set value to "InProgress"
-            let overallStatus = custStatus = workStatus = "Completed";
+            let workChanged, custChanged;
             for (let trEntry of cdEntry[1].tr_links.entries()) {
                 console.log("Processing TR:", trEntry[1].trorder_number);
                 if (trEntry[1].trfunction == 'K') {
                     baa = trEntry[1].resp_user;
                     baaEmail = trEntry[1].userEmail;
-                    if (trEntry[1].status == "InProgress") {
-                        overallStatus = custStatus = "InProgress";
-                    }
                 } else if (trEntry[1].trfunction == 'W') {
                     developer = trEntry[1].resp_user;
                     devEmail = trEntry[1].userEmail;
-                    if (trEntry[1].status == "InProgress") {
-                        overallStatus = workStatus = "InProgress";
-                    }
                 }
 
                 let inputTR = {
@@ -182,32 +183,86 @@ module.exports = (srv) => {
                     status: trEntry[1].status
                 }
 
-                let selecttrquery = SELECT.from(transportreq).columns("parent_id", "parent_cdid").where({ transportnum: inputTR.transportnum })
+                let selecttrquery = SELECT.from(transportreq).columns("parent_id", "parent_cdid", "status").where({ transportnum: inputTR.transportnum })
                 let selecttrresult = await cds.run(selecttrquery);
 
                 if (selecttrresult.length === 0) {
                     console.log("Inserting TR");
-                    inputTR.parent_ID = result.req.data.ID;
+                    if (action == "Insert") {
+                        inputTR.parent_ID = result.req.data.ID;
+                    } else if (action == "Update") {
+                        inputTR.parent_ID = selectcdresult[0].ID
+                    }
                     inputTR.parent_cdid = inputCD.cdid;
                     let inserttrquery = INSERT.into(transportreq).entries(inputTR);
                     await cds.run(inserttrquery);
 
-
+                    //For new TR insert -> ONLY applicable for CD updates
+                    if (action == "Update") {
+                        if (inputTR.trfunction == "K") {
+                            custChanged = true;
+                            if (inputTR.status == "Released") {
+                                custStatus = "Completed"
+                            }else{
+                                custStatus = "InProgress"
+                                overallStatus = "InProgress"
+                            }
+                        } else if (inputTR.trfunction == "W") {
+                            workChanged = true;
+                            if (inputTR.status == "Released") {
+                                workStatus = "Completed";
+                            }else{
+                                workStatus = "InProgress"
+                                overallStatus = "InProgress"
+                            }
+                        }
+                    }
                 } else {
                     console.log("Updating TR");
                     inputTR.parent_ID = selecttrresult[0].parent_ID;
                     inputTR.parent_cdid = inputCD.cdid;
                     let updatetrquery = UPDATE(transportreq, { transportnum: inputTR.transportnum }).with(inputTR)
                     await cds.run(updatetrquery);
+
+                    //For TR update -> If statuses changed from modifiable to released -> reversal completed -> update status at header
+                    if ((selecttrresult[0].status !== inputTR.status) & (inputTR.status == "Released")) {
+                        if (inputTR.trfunction == "K") {
+                            custChanged = true;
+                            custStatus = "Completed"
+                        } else if (inputTR.trfunction == "W") {
+                            workChanged = true;
+                            workStatus = "Completed";
+                        }
+                    }
                 }
             }
 
-            //update CD PIC + Status
-            let updatepicquery = UPDATE(withdrawalCD, { cdid: inputCD.cdid }).set({
-                baa: baa, developer: developer, baaEmail: baaEmail, devEmail: devEmail,
-                overallStatus: overallStatus, custStatus: custStatus, workStatus: workStatus
-            });
-            await cds.run(updatepicquery);
+            //Determine statuses
+            //for new entries -> always in progress
+            //for updates -> check if any status changes
+            if (action == "Insert") {
+                overallStatus = workStatus = custStatus = "InProgress"
+            } else {
+                if ((workStatus == "Completed") & (custStatus == "Completed")) {
+                    overallStatus = "Completed"
+                }
+            }
+
+            //update CD PIC + Status(only insert and status changed)
+            //else update only PIC
+            let updatepicstatquery;
+            // if ((action == "Insert") || (workChanged) || (custChanged)) {
+                updatepicstatquery = UPDATE(withdrawalCD, { cdid: inputCD.cdid }).set({
+                    baa: baa, developer: developer, baaEmail: baaEmail, devEmail: devEmail,
+                    overallStatus: overallStatus, custStatus: custStatus, workStatus: workStatus
+                });
+            // } else {
+            //     updatepicstatquery = UPDATE(withdrawalCD, { cdid: inputCD.cdid }).set({
+            //         baa: baa, developer: developer, baaEmail: baaEmail, devEmail: devEmail
+            //     });
+            // }
+
+            await cds.run(updatepicstatquery);
 
             //send email ONLY if PICs are different
             let sendBaa, sendDev;
