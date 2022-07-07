@@ -9,6 +9,13 @@ module.exports = (srv) => {
 
         is_developer = req.user.is("developer");
         is_baa = req.user.is("baa");
+        is_admin = req.user.is("admin");
+        is_gcm = req.user.is("gcm");
+
+        console.log("User is a developer:", is_developer);
+        console.log("User is a baa:", is_baa);
+        console.log("User is an admin:", is_admin);
+        console.log("User is a GCM:",is_gcm);
 
         if (Array.isArray(result)) {
             for (let i of result.entries()) {

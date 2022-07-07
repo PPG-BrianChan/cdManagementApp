@@ -1,15 +1,17 @@
 using cdManagementApp as cm from '../db/data-model';
 
-service cm_cdservice {
-
-    @Capabilities.InsertRestrictions.Insertable : true
-    @Capabilities.DeleteRestrictions.Deletable  : true
-    @Capabilities.UpdateRestrictions.Updatable  : false
-    @(restrict : [
-        {grant : 'READ'},
-        {grant : 'DELETE',to : 'cdManagement_Admin'}
-    ])
-    entity withdrawalCD as projection on cm.withdrawalCD actions {
+service cm_cdservice @(requires : 'authenticated-user') {
+    entity withdrawalCD @(Capabilities : {
+        InsertRestrictions : {Insertable : true},
+        UpdateRestrictions : {Updatable : true},
+        DeleteRestrictions : {Deletable : true}
+    }, )                @(restrict : [
+        {
+            grant : '*',
+            to    : 'admin'
+        },
+        {grant : 'READ'}
+    ])                  as projection on cm.withdrawalCD actions {
         action assignBAA(newBaa : String, newEmail : String);
         action assignDev(newDev : String, newEmail : String);
         action updateCustStatus();
