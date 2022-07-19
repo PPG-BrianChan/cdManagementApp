@@ -12,11 +12,6 @@ module.exports = (srv) => {
         is_admin = req.user.is("admin");
         is_gcm = req.user.is("gcm");
 
-        console.log("User is a developer:", is_developer);
-        console.log("User is a baa:", is_baa);
-        console.log("User is an admin:", is_admin);
-        console.log("User is a GCM:",is_gcm);
-
         if (Array.isArray(result)) {
             for (let i of result.entries()) {
 
@@ -33,13 +28,12 @@ module.exports = (srv) => {
         } else {
 
             if (!is_developer) {
-                result.assignDevEnabled = true;
-                result.updateWorkEnabled = true;
+                result.assignDevEnabled = false;
+                result.updateWorkEnabled = false;
             }
-
             if (!is_baa) {
-                result.assignBaaEnabled = true;
-                result.updateCustEnabled = true;
+                result.assignBaaEnabled = false;
+                result.updateCustEnabled = false;
             }
         }
     })
@@ -80,42 +74,50 @@ module.exports = (srv) => {
 
     srv.on('updateCustStatus', async (req) => {
         console.log("Event is: Update Cust Status")
+        const newStatus = req.data.newStatus;
         const selectedCD = req.params[0].cdid;
-        const completeStatus = "Completed"
-        const overallStatus = "InProgress";
+        var overallStatus;
 
         let selectcdquery = SELECT.from(withdrawalCD).columns("workStatus", "gcmEmail").where({ cdid: selectedCD });
         selectresult = await cds.run(selectcdquery);
 
-        if (selectresult.workStatus == "Completed") {
-            overallstatus = "Completed"
+        if ((selectresult.workStatus == "Completed") & (newStatus == "Completed")) {
+            overallStatus = "Completed"
+        } else {
+            overallStatus = "InProgress"
         }
-        let updatequery = UPDATE(withdrawalCD, { cdid: selectedCD }).set({ custStatus: completeStatus, overallStatus: overallStatus });
+        let updatequery = UPDATE(withdrawalCD, { cdid: selectedCD }).set({ custStatus: newStatus, overallStatus: overallStatus });
         await cds.run(updatequery);
 
-        if ((overallStatus == "Completed") & selectresult[0].gcmEmail != "") {
-            await sendMail("gcm", selectedCD, gcmEmail);
+        if ((overallStatus == "Completed") & selectresult[0].gcmEmail !== "") {
+            await sendMail("gcm", selectedCD, selectresult[0].gcmEmail);
         }
 
     })
 
     srv.on('updateWorkStatus', async (req) => {
         console.log("Event is: Update Work Status")
+        const newStatus = req.data.newStatus;
         const selectedCD = req.params[0].cdid;
-        const completeStatus = "Completed"
-        const overallStatus = "InProgress";
+        var overallStatus;
 
-        let selectcdquery = SELECT.from(withdrawalCD).columns("custStatus", "gcmEmail").where({ cdid: selectedCD });
+        let selectcdquery = SELECT.from(withdrawalCD).columns("custStatus", "gcmEmail", "baaEmail").where({ cdid: selectedCD });
         selectresult = await cds.run(selectcdquery);
 
-        if (selectresult.custStatus == "Completed") {
-            overallstatus = "Completed"
+        if ((selectresult.custStatus == "Completed") & (newStatus == "Completed")) {
+            overallStatus = "Completed"
+        } else {
+            overallStatus = "InProgress"
         }
-        let updatequery = UPDATE(withdrawalCD, { cdid: selectedCD }).set({ workStatus: completeStatus, overallStatus: overallStatus });
+        let updatequery = UPDATE(withdrawalCD, { cdid: selectedCD }).set({ workStatus: newStatus, overallStatus: overallStatus });
         await cds.run(updatequery);
 
-        if ((overallStatus == "Completed") & selectresult[0].gcmEmail != "") {
-            await sendMail("gcm", selectedCD, gcmEmail);
+        if ((newStatus == "Completed") & (selectresult[0].baaEmail !== "")) {
+            await sendMail("baaValidate", selectedCD, selectresult[0].baaEmail)
+        }
+
+        if ((overallStatus == "Completed") & selectresult[0].gcmEmail !== "") {
+            await sendMail("gcm", selectedCD, selectresult[0].gcmEmail);
         }
     })
 
@@ -124,7 +126,7 @@ module.exports = (srv) => {
 
         for (let cdEntry of req.data.inputcd.entries()) {
             console.log("Processing CD:", cdEntry[1].object_id);
-            let baa, developer, gcm, baaEmail, devEmail, gcmEmail;
+            let baa, developer, baaEmail, devEmail;
             let overallStatus, workStatus, custStatus;
 
             //baa details & dev details & gcm details & statuses -> will be updated after processing TRs
@@ -138,8 +140,8 @@ module.exports = (srv) => {
                 developer: developer,
                 baaEmail: baaEmail,
                 devEmail: devEmail,
-                gcm: gcm,
-                gcmEmail: gcmEmail
+                gcm: cdEntry[1].gcm,
+                gcmEmail: cdEntry[1].gcmEmail
             };
 
             let selectcdquery = SELECT.from(withdrawalCD).where({ cdid: inputCD.cdid })
@@ -167,10 +169,10 @@ module.exports = (srv) => {
                 overallStatus = selectcdresult[0].overallStatus
                 workStatus = selectcdresult[0].workStatus
                 custStatus = selectcdresult[0].custStatus
-                console.log("Old values", overallStatus,workStatus,custStatus)
+                // console.log("Old values", overallStatus, workStatus, custStatus)
             }
             //Process TR -> Insert or Update TR; Based on the statuses will update CD status as well
-            let workChanged, custChanged;
+            // let workChanged, custChanged;
             for (let trEntry of cdEntry[1].tr_links.entries()) {
                 console.log("Processing TR:", trEntry[1].trorder_number);
                 if (trEntry[1].trfunction == 'K') {
@@ -210,7 +212,7 @@ module.exports = (srv) => {
                             custChanged = true;
                             if (inputTR.status == "Released") {
                                 custStatus = "Completed"
-                            }else{
+                            } else {
                                 custStatus = "InProgress"
                                 overallStatus = "InProgress"
                             }
@@ -218,7 +220,7 @@ module.exports = (srv) => {
                             workChanged = true;
                             if (inputTR.status == "Released") {
                                 workStatus = "Completed";
-                            }else{
+                            } else {
                                 workStatus = "InProgress"
                                 overallStatus = "InProgress"
                             }
@@ -259,10 +261,10 @@ module.exports = (srv) => {
             //else update only PIC
             let updatepicstatquery;
             // if ((action == "Insert") || (workChanged) || (custChanged)) {
-                updatepicstatquery = UPDATE(withdrawalCD, { cdid: inputCD.cdid }).set({
-                    baa: baa, developer: developer, baaEmail: baaEmail, devEmail: devEmail,
-                    overallStatus: overallStatus, custStatus: custStatus, workStatus: workStatus
-                });
+            updatepicstatquery = UPDATE(withdrawalCD, { cdid: inputCD.cdid }).set({
+                baa: baa, developer: developer, baaEmail: baaEmail, devEmail: devEmail,
+                overallStatus: overallStatus, custStatus: custStatus, workStatus: workStatus
+            });
             // } else {
             //     updatepicstatquery = UPDATE(withdrawalCD, { cdid: inputCD.cdid }).set({
             //         baa: baa, developer: developer, baaEmail: baaEmail, devEmail: devEmail

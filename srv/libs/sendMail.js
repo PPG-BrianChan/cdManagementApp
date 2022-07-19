@@ -23,6 +23,13 @@ module.exports = async function (mailfunction, cdid, recipient) {
         "body": `A notification that changes for CD ${cdid} have been completed reversed. The CD can now be withdrawn in SOLMAN.`
     }
 
+    var baaValidatepayload = {
+        "sender": "sapcoebtpgeneral@ppg.com",
+        "recipient": recipient,
+        "subject": `CD ${cdid} : Change validation`,
+        "body": `A workbench reversal is completed for CD ${cdid}. Kindly validate the changes in development system.`
+    }
+
     var payload;
 
     console.log(mailfunction, typeof mailfunction)
@@ -35,6 +42,9 @@ module.exports = async function (mailfunction, cdid, recipient) {
             break;
         case "gcm":
             payload = gcmpayload;
+            break;
+        case "baaValidate":
+            payload = baaValidatepayload;
             break;
     }
 

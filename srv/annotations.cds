@@ -121,7 +121,7 @@ annotate cm.withdrawalCD with @UI : {
 
 };
 
-annotate cm.transportreq {
+annotate cm.transportreq with {
     transportnum @title     : '{i18n>TRNum}';
     resp_user    @title     : '{i18n>RespUser}';
     trfunction   @title     : '{i18n>TRFunc}';
@@ -247,19 +247,51 @@ annotate cm_cdservice.withdrawalCD actions {
     @UI.Hidden
     newEmail);
 
-    @Common                          : {SideEffects : {
-        $Type          : 'Common.SideEffectsType',
-        TargetEntities : [_it],
-    }, }
+    @Common                          : {SideEffects : {TargetEntities : [_it], }, }
     @cds.odata.bindingparameter.name : '_it'
     @Core.OperationAvailable         : _it.updateCustEnabled
-    updateCustStatus;
+    updateCustStatus(
+    @Common                          : {
+        ValueListWithFixedValues : true,
+        ValueList                : {
+            Label          : '{i18n>Statuses}',
+            CollectionPath : 'status',
+            Parameters     : [{
+                $Type             : 'Common.ValueListParameterInOut',
+                ValueListProperty : 'status',
+                LocalDataProperty : newStatus
+            }]
+        }
+    }
+    @title                           : '{i18n>newStatus}'
+    newStatus);
 
-    @Common                          : {SideEffects : {
-        $Type          : 'Common.SideEffectsType',
-        TargetEntities : [_it],
-    }, }
     @cds.odata.bindingparameter.name : '_it'
+    @Common.SideEffects              : {TargetEntities : ['_it', ], }
     @Core.OperationAvailable         : _it.updateWorkEnabled
-    updateWorkStatus
+    updateWorkStatus(
+    @Common                          : {
+        ValueListWithFixedValues : true,
+        ValueList                : {
+            Label          : '{i18n>Statuses}',
+            CollectionPath : 'status',
+            Parameters     : [{
+                $Type             : 'Common.ValueListParameterInOut',
+                ValueListProperty : 'status',
+                LocalDataProperty : newStatus
+            }]
+        }
+    }
+    @title                           : '{i18n>newStatus}'
+    newStatus)
+}
+
+annotate cm_cdservice.users with {
+    userid   @title : '{i18n>Userid}';
+    fullname @title : '{i18n>Fullname}';
+    email    @title : '{i18n>Email}';
+}
+
+annotate cm_cdservice.status with {
+    status @title : '{i18n>Status}'
 }

@@ -39,6 +39,10 @@ entity users {
         email    : String
 }
 
+entity status{
+    key status : String
+}
+
 type inputCD {
     guid                : String;
     guid32              : String;
