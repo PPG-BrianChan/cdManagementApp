@@ -20,6 +20,18 @@ annotate cm.withdrawalCD with {
 }
 
 annotate cm.withdrawalCD with @UI : {
+    PresentationVariant :{
+        SortOrder : [
+            {
+                Property : cdid,
+                Descending : false,
+            },
+        ],
+        Visualizations : [
+            '@UI.LineItem',
+        ],
+    },
+    
     HeaderInfo        : {
         TypeName       : '{i18n>CD}',
         TypeNamePlural : '{i18n>CDs}',

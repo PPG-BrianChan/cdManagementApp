@@ -5,28 +5,28 @@ module.exports = async function (mailfunction, cdid, recipient) {
     var baapayload = {
         "sender": "sapcoebtpgeneral@ppg.com",
         "recipient": recipient,
-        "subject": `CD ${cdid} to be withdrawn`,
+        "subject": `TESTING : CD ${cdid} to be withdrawn`,
         "body": `You have been assigned to reverse customizing changes implemented in CD ${cdid}.`
     }
 
     var devpayload = {
         "sender": "sapcoebtpgeneral@ppg.com",
         "recipient": recipient,
-        "subject": `CD ${cdid} to be withdrawn`,
+        "subject": `TESTING : CD ${cdid} to be withdrawn`,
         "body": `You have been assigned to reverse workbench changes implemented in CD ${cdid}.`
     }
 
     var gcmpayload = {
         "sender": "sapcoebtpgeneral@ppg.com",
         "recipient": recipient,
-        "subject": `CD ${cdid} ready for Withdrawal`,
+        "subject": `TESTING : CD ${cdid} ready for Withdrawal`,
         "body": `A notification that changes for CD ${cdid} have been completed reversed. The CD can now be withdrawn in SOLMAN.`
     }
 
     var baaValidatepayload = {
         "sender": "sapcoebtpgeneral@ppg.com",
         "recipient": recipient,
-        "subject": `CD ${cdid} : Change validation`,
+        "subject": `TESTING : CD ${cdid} : Change validation`,
         "body": `A workbench reversal is completed for CD ${cdid}. Kindly validate the changes in development system.`
     }
 
