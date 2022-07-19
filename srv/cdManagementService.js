@@ -175,10 +175,10 @@ module.exports = (srv) => {
             // let workChanged, custChanged;
             for (let trEntry of cdEntry[1].tr_links.entries()) {
                 console.log("Processing TR:", trEntry[1].trorder_number);
-                if (trEntry[1].trfunction == 'K') {
+                if (trEntry[1].trfunction == "W") {
                     baa = trEntry[1].resp_user;
                     baaEmail = trEntry[1].userEmail;
-                } else if (trEntry[1].trfunction == 'W') {
+                } else if (trEntry[1].trfunction == "K") {
                     developer = trEntry[1].resp_user;
                     devEmail = trEntry[1].userEmail;
                 }
@@ -208,7 +208,7 @@ module.exports = (srv) => {
 
                     //For new TR insert -> ONLY applicable for CD updates
                     if (action == "Update") {
-                        if (inputTR.trfunction == "K") {
+                        if (inputTR.trfunction == "W") {
                             custChanged = true;
                             if (inputTR.status == "Released") {
                                 custStatus = "Completed"
@@ -216,7 +216,7 @@ module.exports = (srv) => {
                                 custStatus = "InProgress"
                                 overallStatus = "InProgress"
                             }
-                        } else if (inputTR.trfunction == "W") {
+                        } else if (inputTR.trfunction == "K") {
                             workChanged = true;
                             if (inputTR.status == "Released") {
                                 workStatus = "Completed";
@@ -235,10 +235,10 @@ module.exports = (srv) => {
 
                     //For TR update -> If statuses changed from modifiable to released -> reversal completed -> update status at header
                     if ((selecttrresult[0].status !== inputTR.status) & (inputTR.status == "Released")) {
-                        if (inputTR.trfunction == "K") {
+                        if (inputTR.trfunction == "W") {
                             custChanged = true;
                             custStatus = "Completed"
-                        } else if (inputTR.trfunction == "W") {
+                        } else if (inputTR.trfunction == "K") {
                             workChanged = true;
                             workStatus = "Completed";
                         }
