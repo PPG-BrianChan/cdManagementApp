@@ -7,6 +7,10 @@ GET http://localhost:4004/cm-cdservice/withdrawalCD
 GET http://localhost:4004/cm-cdservice/transportreq
 
 ### ------------------------------------------------------------------------
+# Get CD Status list
+GET http://localhost:4004/cm-cdservice/cdStatus
+
+### ------------------------------------------------------------------------
 # Mass create entity
 # POST http://localhost:4004/cm-cdservice/updateCDList
 POST http://localhost:4004/API/updateCDList
@@ -21,6 +25,14 @@ Content-Type: application/json
         "process_type" : "Z1HF",
         "description" : "TESTING",
         "posting_date": "2017-06-11",
+        "chronoStatuses" : [
+            {
+                "date":  "2017-06-11", "time": "13:06:24", "status" : "In Development"
+            },
+            {
+                "date":  "2017-06-12", "time": "09:06:24", "status" : "To be tested"
+            }
+        ],
         "tr_links": [
             { "originator_id": "ASWW589EGSAQ985EFX#&G8621##56823", "trorder_number": "T15K918390SA", "description": "3001333: Test Change URGENT",
               "sys_type": "ABAP","sys_client": "100", "cts_id": "T15_P00404", "transport_track": "TR000025",
@@ -56,6 +68,7 @@ Content-Type: application/json
         "process_type" : "Z1HF",
         "description" : "TESTING 2",
         "posting_date": "2017-06-21",
+        "chronoStatuses" : [],
         "tr_links": [
             { "originator_id": "ASWW589EGSAQ985EFX#&G8621##56899", "trorder_number": "T15K911111SA", "description": "3001339: Test Change URGENT",
               "sys_type": "ABAP","sys_client": "100", "cts_id": "T15_P00404", "transport_track": "TR000025",

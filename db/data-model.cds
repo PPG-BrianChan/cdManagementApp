@@ -17,6 +17,8 @@ entity withdrawalCD : cuid, managed {
         gcmEmail                  : String;
         custStatus                : String;
         workStatus                : String;
+        chronoStatuses            : Composition of many cdStatus
+                                        on chronoStatuses.parent = $self; 
         transportlist             : Composition of many transportreq
                                         on transportlist.parent = $self;
         virtual assignBaaEnabled  : Boolean default true;
@@ -43,6 +45,13 @@ entity status{
     key status : String
 }
 
+entity cdStatus : cuid, managed {
+    key parent       : Association to withdrawalCD;
+    date             : Date;
+    time             : Time;
+    status           : String;
+}
+
 type inputCD {
     guid                : String;
     guid32              : String;
@@ -53,6 +62,11 @@ type inputCD {
     description         : String;
     gcm                 : String;
     gcmEmail            : String;
+        chronoStatuses      : many {
+        date           : Date;
+        time           : Time;
+        status         : String;
+    };
     tr_links            : many {
         originator_id   : String;
         trorder_number  : String;
@@ -65,5 +79,5 @@ type inputCD {
         userEmail       : String;
         trfunction      : String(1);
         status          : String
-    }
+    };
 }

@@ -20,32 +20,28 @@ annotate cm.withdrawalCD with {
 }
 
 annotate cm.withdrawalCD with @UI : {
-    PresentationVariant :{
-        SortOrder : [
-            {
-                Property : cdid,
-                Descending : false,
-            },
-        ],
-        Visualizations : [
-            '@UI.LineItem',
-        ],
+    PresentationVariant : {
+        SortOrder      : [{
+            Property   : cdid,
+            Descending : false,
+        }, ],
+        Visualizations : ['@UI.LineItem', ],
     },
-    
-    HeaderInfo        : {
+
+    HeaderInfo          : {
         TypeName       : '{i18n>CD}',
         TypeNamePlural : '{i18n>CDs}',
         Title          : {Value : cdid},
         Description    : {Value : cdDesc}
     },
-    SelectionFields   : [
+    SelectionFields     : [
         cdid,
         gcm,
         baa,
         developer
     ],
 
-    LineItem          : [
+    LineItem            : [
         {
             $Type  : 'UI.DataFieldForAction',
             Action : 'cm_cdservice.assignBAA',
@@ -100,7 +96,7 @@ annotate cm.withdrawalCD with @UI : {
         }
     ],
 
-    Facets            : [
+    Facets              : [
         {
             $Type  : 'UI.ReferenceFacet',
             Label  : '{i18n>PIC}',
@@ -114,18 +110,23 @@ annotate cm.withdrawalCD with @UI : {
         {
             $Type  : 'UI.ReferenceFacet',
             Label  : '{i18n>TRList}',
-            Target : 'transportlist/@UI.LineItem'
+            Target : 'transportlist/@UI.PresentationVariant'
+        },
+        {
+            $Type  : 'UI.ReferenceFacet',
+            Label  : '{i18n>CDChronoStatuses}',
+            Target : 'chronoStatuses/@UI.PresentationVariant'
         }
     ],
 
-    FieldGroup #Admin : {Data : [
+    FieldGroup #Admin   : {Data : [
         {Value : gcm},
         {Value : baa},
         {Value : developer},
         {Value : overallStatus},
     ]},
 
-    FieldGroup #PIC   : {Data : [
+    FieldGroup #PIC     : {Data : [
         {Value : custStatus},
         {Value : workStatus},
     ]},
@@ -150,13 +151,20 @@ annotate cm.transportreq with {
 
 annotate cm.transportreq with
 @UI : {
-    HeaderInfo         : {
+    PresentationVariant : {
+        SortOrder      : [{
+            Property   : transportnum,
+            Descending : false,
+        }, ],
+        Visualizations : ['@UI.LineItem', ],
+    },
+    HeaderInfo          : {
         TypeName       : '{i18n>TR}',
         TypeNamePlural : '{i18n>TRs}',
         Title          : {Value : transportnum}
     },
 
-    LineItem           : [
+    LineItem            : [
         {
             $Type : 'UI.DataField',
             Value : transportnum
@@ -175,15 +183,77 @@ annotate cm.transportreq with
         },
     ],
 
-    Facets             : [{
+    Facets              : [{
         $Type  : 'UI.ReferenceFacet',
         Label  : '{i18n>TRInfo}',
         Target : '@UI.FieldGroup#TRInfo'
     }],
 
-    FieldGroup #TRInfo : {Data : [
+    FieldGroup #TRInfo  : {Data : [
         {Value : resp_user},
         {Value : trfunction},
+        {Value : status},
+    ]},
+
+};
+
+annotate cm.cdStatus with {
+    date        @title     : '{i18n>Date}';
+    time        @title     : '{i18n>Time}';
+    status      @title     : '{i18n>CDStatus}';
+    parent_ID   @UI.Hidden : true;
+    parent_cdid @UI.Hidden : true;
+    ID          @UI.Hidden : true;
+    createdAt   @UI.Hidden : true;
+    createdBy   @UI.Hidden : true;
+    modifiedAt  @UI.Hidden : true;
+    modifiedBy  @UI.Hidden : true;
+};
+
+annotate cm.cdStatus with
+@UI : {
+    PresentationVariant  : {
+        SortOrder      : [
+            {
+                Property   : date,
+                Descending : false,
+            },
+            {
+                Property   : time,
+                Descending : false
+            }
+        ],
+        Visualizations : ['@UI.LineItem', ],
+    },
+    HeaderInfo           : {
+        TypeName       : '{i18n>CDStatus}',
+        TypeNamePlural : '{i18n>CDChronoStatuses}'
+    },
+
+    LineItem             : [
+        {
+            $Type : 'UI.DataField',
+            Value : date
+        },
+        {
+            $Type : 'UI.DataField',
+            Value : time
+        },
+        {
+            $Type : 'UI.DataField',
+            Value : status
+        },
+    ],
+
+    Facets               : [{
+        $Type  : 'UI.ReferenceFacet',
+        Label  : '{i18n>CDStatus}',
+        Target : '@UI.FieldGroup#CDStatus'
+    }],
+
+    FieldGroup #CDStatus : {Data : [
+        {Value : date},
+        {Value : time},
         {Value : status},
     ]},
 
