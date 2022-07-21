@@ -114,7 +114,7 @@ annotate cm.withdrawalCD with @UI : {
         },
         {
             $Type  : 'UI.ReferenceFacet',
-            Label  : '{i18n>CDChronoStatuses}',
+            Label  : '{i18n>CDStatuses}',
             Target : 'chronoStatuses/@UI.PresentationVariant'
         }
     ],
