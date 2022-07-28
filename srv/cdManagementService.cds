@@ -12,26 +12,32 @@ service cm_cdservice @(requires : 'authenticated-user') {
             to    : 'admin'
         },
         {
-            grant : ['assignDev','updateWorkStatus'],
+            grant : [
+                'assignDev',
+                'updateWorkStatus'
+            ],
             to    : 'developer'
         },
         {
-            grant : ['assignBAA','updateCustStatus'],
+            grant : [
+                'assignBAA',
+                'updateCustStatus'
+            ],
             to    : 'baa'
         },
         {grant : 'READ'}
-    ])                  
-    as projection on cm.withdrawalCD actions {
+    ])                    as projection on cm.withdrawalCD actions {
         action assignBAA(newBaa : String, newEmail : String);
         action assignDev(newDev : String, newEmail : String);
         action updateCustStatus(newStatus : String);
         action updateWorkStatus(newStatus : String);
     }
 
-    entity status       as projection on cm.status
-    entity users        as projection on cm.users
-    entity transportreq as projection on cm.transportreq
-    entity cdStatus     as projection on cm.cdStatus   
+    entity status         as projection on cm.status
+    entity users          as projection on cm.users
+    entity transportreq   as projection on cm.transportreq
+    entity cdStatus       as projection on cm.cdStatus
+    entity trfunctionText as projection on cm.trfunctionText
 }
 
 service APIService @(

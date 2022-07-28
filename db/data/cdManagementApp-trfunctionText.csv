@@ -1,0 +1,17 @@
+trfunction;description
+K;Workbench Request
+W;Customizing Request
+C;Relocation of Objects Without Package Change
+O;Relocation of Objects with Package Change
+E;Relocation of complete package
+T;Transport of Copies
+S;Development/Correction
+R;Repair
+X;Unclassified Task
+Q;Customizing Task
+G;Piece List for CTS Project
+M;Client Transport Request
+P;Piece List for Upgrade
+D;Piece List for Support Package
+F;Piece List
+L;Deletion transport

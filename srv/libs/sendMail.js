@@ -6,6 +6,7 @@ module.exports = async function (mailfunction, cdid, recipient) {
         "sender": "sapcoebtpgeneral@ppg.com",
         "recipient": recipient,
         "subject": `TESTING : CD ${cdid} to be withdrawn`,
+        "type": "HTML",
         "body": `You have been assigned to reverse customizing changes implemented in CD ${cdid}.`
     }
 
@@ -13,13 +14,15 @@ module.exports = async function (mailfunction, cdid, recipient) {
         "sender": "sapcoebtpgeneral@ppg.com",
         "recipient": recipient,
         "subject": `TESTING : CD ${cdid} to be withdrawn`,
-        "body": `You have been assigned to reverse workbench changes implemented in CD ${cdid}.`
+        "type": "HTML",
+        "body": `You have been assigned to reverse workbench changes implemented in CD ${cdid}.<br>https://google.com`
     }
 
     var gcmpayload = {
         "sender": "sapcoebtpgeneral@ppg.com",
         "recipient": recipient,
         "subject": `TESTING : CD ${cdid} ready for Withdrawal`,
+        "type": "HTML",
         "body": `A notification that changes for CD ${cdid} have been completed reversed. The CD can now be withdrawn in SOLMAN.`
     }
 
@@ -27,6 +30,7 @@ module.exports = async function (mailfunction, cdid, recipient) {
         "sender": "sapcoebtpgeneral@ppg.com",
         "recipient": recipient,
         "subject": `TESTING : CD ${cdid} : Change validation`,
+        "type": "HTML",
         "body": `A workbench reversal is completed for CD ${cdid}. Kindly validate the changes in development system.`
     }
 
@@ -50,16 +54,16 @@ module.exports = async function (mailfunction, cdid, recipient) {
 
     try {
         console.log("Mail sending disabled for now");
-        // await executeHttpRequest(
-        //     {
-        //         destinationName: "Mail_Service_API"
-        //     },
-        //     {
-        //         method: 'POST',
-        //         data: payload,
-        //         url: "/mailrequests"
-        //     }
-        // )
+        await executeHttpRequest(
+            {
+                destinationName: "Mail_Service_API"
+            },
+            {
+                method: 'POST',
+                data: payload,
+                url: "/mailrequests"
+            }
+        )
     }
     catch (error) {
         console.log("Error occured during mail sending, kindly check at mail service");
