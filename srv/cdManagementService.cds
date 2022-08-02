@@ -25,7 +25,8 @@ service cm_cdservice @(requires : 'authenticated-user') {
             to    : 'baa'
         },
         {grant : 'READ'}
-    ])                    as projection on cm.withdrawalCD actions {
+    ])                    
+    as projection on cm.withdrawalCD actions {
         action assignBAA(newBaa : String, newEmail : String);
         action assignDev(newDev : String, newEmail : String);
         action updateCustStatus(newStatus : String);

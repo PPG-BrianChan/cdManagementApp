@@ -256,6 +256,8 @@ module.exports = (srv) => {
             //--------------------------Main Process 3-------------------------------------------------
             //Insert Chonological CD Statuses
             //--------------------------Main Process 3-------------------------------------------------
+            let changeOverall = false;
+
             if (cdEntry[1].chronoStatuses.length !== 0) {
                 for (let csEntry of cdEntry[1].chronoStatuses.entries()) {
                     let inputCS = {
@@ -280,7 +282,11 @@ module.exports = (srv) => {
                     if (selectcdstatresult.length === 0) {
                         let insertcsquery = INSERT.into(cdStatus).entries(inputCS);
                         await cds.run(insertcsquery);
-                    }else{
+
+                        if (inputCS.status == "Successfully Tested") {
+                            changeOverall = true
+                        }
+                    } else {
                         //do nothing
                     }
                 }
@@ -297,7 +303,9 @@ module.exports = (srv) => {
             } else {
                 if ((workStatus == "Completed") & (custStatus == "Completed")) {
                     //Need to add check for CD status
-                    overallStatus = "Completed"
+                    if (changeOverall == true) {
+                        overallStatus = "Completed"
+                    }
                 }
             }
 

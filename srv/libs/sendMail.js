@@ -54,16 +54,16 @@ module.exports = async function (mailfunction, cdid, recipient) {
 
     try {
         console.log("Mail sending disabled for now");
-        // await executeHttpRequest(
-        //     {
-        //         destinationName: "Mail_Service_API"
-        //     },
-        //     {
-        //         method: 'POST',
-        //         data: payload,
-        //         url: "/mailrequests"
-        //     }
-        // )
+        await executeHttpRequest(
+            {
+                destinationName: "Mail_Service_API"
+            },
+            {
+                method: 'POST',
+                data: payload,
+                url: "/mailrequests"
+            }
+        )
     }
     catch (error) {
         console.log("Error occured during mail sending, kindly check at mail service");
