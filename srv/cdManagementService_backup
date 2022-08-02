@@ -274,15 +274,8 @@ module.exports = (srv) => {
                     }
                     inputCS.parent_cdid = inputCD.cdid;
 
-                    let selectcdstatquery = SELECT.from(cdStatus).columns("parent_id", "parent_cdid", "status").where({ parent_cdid: inputCS.parent_cdid, date: inputCS.date, time: inputCS.time, status: inputCS.status })
-                    let selectcdstatresult = await cds.run(selectcdstatquery);
-
-                    if (selectcdstatresult.length === 0) {
-                        let insertcsquery = INSERT.into(cdStatus).entries(inputCS);
-                        await cds.run(insertcsquery);
-                    }else{
-                        //do nothing
-                    }
+                    let insertcsquery = INSERT.into(cdStatus).entries(inputCS);
+                    await cds.run(insertcsquery);
                 }
             }
 
@@ -296,7 +289,6 @@ module.exports = (srv) => {
                 overallStatus = workStatus = custStatus = "InProgress"
             } else {
                 if ((workStatus == "Completed") & (custStatus == "Completed")) {
-                    //Need to add check for CD status
                     overallStatus = "Completed"
                 }
             }

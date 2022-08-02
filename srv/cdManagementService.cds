@@ -5,8 +5,7 @@ service cm_cdservice @(requires : 'authenticated-user') {
         InsertRestrictions : {Insertable : true},
         UpdateRestrictions : {Updatable : true},
         DeleteRestrictions : {Deletable : true}
-    // })
-    }, )                @(restrict : [
+    })                  @(restrict : [
         {
             grant : '*',
             to    : 'admin'
