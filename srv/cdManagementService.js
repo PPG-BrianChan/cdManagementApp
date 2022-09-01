@@ -1,41 +1,113 @@
 cds.env.odata.protectMetadata = false
 const sendMail = require('./libs/sendMail.js')
+const cdsapi = require('@sapmentors/cds-scp-api');
+const sorty = require('sorty');
+const orand = ['or', 'and'];
+const supportedquery = ['startswith', 'contains'];
+const userServiceAction = `/getUsersWithParams`
+const userServiceAction_post = `/getUsers`
+const devUsersURL = `/v1.0/groups/1dddc414-b7ab-45bb-97ca-866b471daf87/members`
+const basicParams = `$select=mailNickname,displayName,mail&$count=true`
 
 module.exports = (srv) => {
-    const { withdrawalCD, transportreq, cdStatus } = srv.entities;
+    const { withdrawalCD, transportreq, cdStatus, baaUsers, devUsers } = srv.entities;
+
+    srv.on('READ', 'devUsers', async (req) => {
+        console.log("Enter event read devUsers");
+        var destination = "User_List_Service_API";
+        
+        var graphQuery = '';
+        console.log(req._queryOptions)
+
+        if (req._queryOptions.$search !== undefined) {
+            var search = req._queryOptions.$search;
+            search = search.replace(/\*/g, '');
+            var output = [search.slice(0, 1), 'displayName:', search.slice(1)].join('');
+            graphQuery = `$search=${output}`
+        }
+
+        var userlist = {}
+        var url = '';
+        url = userServiceAction_post
+
+        var data = {
+            "requrl": devUsersURL,
+            "reqparams": `${basicParams}&${graphQuery}`
+        }
+
+        console.log(data.reqparams);
+        const service = await cdsapi.connect.to(destination);
+        try {
+            const graphUser = await service.run({
+                url: url,
+                data: data,
+                method: "POST",
+            })
+
+            var count = 0;
+            userlist = graphUser.value.value.map(graph_user => {
+                var user = {};
+                count++;
+                user.userid = graph_user.mailNickname;
+                user.fullname = graph_user.displayName;
+                user.email = graph_user.mail;
+                return user;
+            });
+
+
+            //Order by --> graph only supports orderby for fullname --> we will do the sort manually in js
+            if (req.query.SELECT.orderBy) {
+                var criteria = [];
+                for (let orderBy of req.query.SELECT.orderBy.entries()) {
+                    if (orderBy[1].sort == 'asc') {
+                        criteria.push({ name: `${orderBy[1].ref}`, dir: 'asc' })
+                    } else {
+                        criteria.push({ name: `${orderBy[1].ref}`, dir: 'desc' })
+                    }
+                }
+            }
+            sorty(criteria, userlist);
+            Object.assign(userlist, { $count: count });
+        }
+        catch (error) {
+            req.error({ "code": error.response.data.error.code, "message": error.response.data.error.message })
+        }
+        return userlist;
+
+    });
 
     srv.after('READ', 'withdrawalCD', (result, req) => {
-        console.log("Event is: After READ")
+        // console.log("Event is: After READ CDs")
 
-        is_developer = req.user.is("developer");
-        is_baa = req.user.is("baa");
-        is_admin = req.user.is("admin");
-        is_gcm = req.user.is("gcm");
+        // is_developer = req.user.is("developer");
+        // is_baa = req.user.is("baa");
+        // is_admin = req.user.is("admin");
+        // is_gcm = req.user.is("gcm");
 
-        if (Array.isArray(result)) {
-            for (let i of result.entries()) {
+        // if (Array.isArray(result)) {
+        //     for (let i of result.entries()) {
 
-                if (!is_developer) {
-                    i[1].assignDevEnabled = false;
-                    i[1].updateWorkEnabled = false;
-                }
+        //         if (!is_developer) {
+        //             i[1].assignDevEnabled = false;
+        //             i[1].updateWorkEnabled = false;
+        //         }
 
-                if (!is_baa) {
-                    i[1].assignBaaEnabled = false;
-                    i[1].updateCustEnabled = false;
-                }
-            }
-        } else {
+        //         if (!is_baa) {
+        //             i[1].assignBaaEnabled = false;
+        //             i[1].updateCustEnabled = false;
+        //         }
+        //     }
+        // } else {
 
-            if (!is_developer) {
-                result.assignDevEnabled = false;
-                result.updateWorkEnabled = false;
-            }
-            if (!is_baa) {
-                result.assignBaaEnabled = false;
-                result.updateCustEnabled = false;
-            }
-        }
+        //     if (!is_developer) {
+        //         result.assignDevEnabled = false;
+        //         result.updateWorkEnabled = false;
+        //     }
+        //     if (!is_baa) {
+        //         result.assignBaaEnabled = false;
+        //         result.updateCustEnabled = false;
+        //     }
+        // }
     })
 
     srv.on('assignBAA', async (req) => {
