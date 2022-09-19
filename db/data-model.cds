@@ -2,12 +2,13 @@ namespace cdManagementApp;
 
 using {
     cuid,
-    managed
+    managed,
 } from '@sap/cds/common';
 
 entity withdrawalCD : cuid, managed {
     key cdid                      : String;
         cdDesc                    : String;
+        catid                     : Association to one categoryText;
         overallStatus             : String;
         baa                       : String;
         baaEmail                  : String;
@@ -55,6 +56,11 @@ entity cdStatus : cuid, managed {
 entity trfunctionText {
     trfunction  : String(1);
     description : String
+}
+
+entity categoryText {
+    key catid       : String(1);
+        description : String;
 }
 
 type inputCD {

@@ -2,20 +2,92 @@ cds.env.odata.protectMetadata = false
 const sendMail = require('./libs/sendMail.js')
 const cdsapi = require('@sapmentors/cds-scp-api');
 const sorty = require('sorty');
-const orand = ['or', 'and'];
-const supportedquery = ['startswith', 'contains'];
-const userServiceAction = `/getUsersWithParams`
 const userServiceAction_post = `/getUsers`
 const devUsersURL = `/v1.0/groups/1dddc414-b7ab-45bb-97ca-866b471daf87/members`
+const baaGroupIDs = ['02faedb6-8a7e-413b-b2fc-dffd9543e132', '1776573d-774d-4d69-978e-95edb9522abe', '1e868fd0-0eb4-4872-96bf-2b40d141406f', '40b5433a-f44c-4c6c-99c7-a12cd5b68248', 'e4067f89-2cae-4e28-bf8f-ff67e716536b']
 const basicParams = `$select=mailNickname,displayName,mail&$count=true`
 
 module.exports = (srv) => {
-    const { withdrawalCD, transportreq, cdStatus, baaUsers, devUsers } = srv.entities;
+    const { withdrawalCD, transportreq, cdStatus } = srv.entities;
+
+    function getUniqueListBy(arr, key) {
+        return [...new Map(arr.map(item => [item[key], item])).values()]
+    }
+
+    srv.on('READ', 'baaUsers', async (req) => {
+        console.log("Enter event read baaUsers");
+        var destination = "User_List_Service_API";
+        var graphQuery = '';
+
+        if (req._queryOptions.$search !== undefined) {
+            var search = req._queryOptions.$search;
+            search = search.replace(/\*/g, '');
+            var output = [search.slice(0, 1), 'displayName:', search.slice(1)].join('');
+            graphQuery = `$search=${output}`
+        }
+
+        var userlist = [];
+        var url = '';
+        url = userServiceAction_post
+        var count = 0;
+
+        for (let baaGroupID of baaGroupIDs.entries()) {
+            var baaUsersURL = `/v1.0/groups/${baaGroupID[1]}/members`
+            var data = {
+                "requrl": baaUsersURL,
+                "reqparams": `${basicParams}&${graphQuery}`
+            }
+            const service = await cdsapi.connect.to(destination);
+            try {
+                const graphUser = await service.run({
+                    url: url,
+                    data: data,
+                    method: "POST",
+                })
+
+                var tempuserlist = graphUser.value.value.map(graph_user => {
+                    var user = {};
+                    user.userid = graph_user.mailNickname;
+                    user.fullname = graph_user.displayName;
+                    user.email = graph_user.mail;
+                    return user;
+                });
+                userlist = userlist.concat(tempuserlist);
+            }
+            catch (error) {
+                if (error.response.data !== undefined) {
+                    req.error({ "code": error.response.data.error.code, "message": error.response.data.error.message })
+                } else {
+                    req.error({ "message": error.message });
+                }
+            }
+        }
+
+        //Order by --> graph only supports orderby for fullname --> we will do the sort manually in js
+        if (req.query.SELECT.orderBy) {
+            var criteria = [];
+            for (let orderBy of req.query.SELECT.orderBy.entries()) {
+                if (orderBy[1].sort == 'asc') {
+                    criteria.push({ name: `${orderBy[1].ref}`, dir: 'asc' })
+                } else {
+                    criteria.push({ name: `${orderBy[1].ref}`, dir: 'desc' })
+                }
+            }
+        }
+        sorty(criteria, userlist);
+
+        //filter duplicates
+        userlist = getUniqueListBy(userlist, 'fullname');
+
+        //Get count
+        count = userlist.length;
+        Object.assign(userlist, { $count: count });
+        return userlist;
+    });
 
     srv.on('READ', 'devUsers', async (req) => {
         console.log("Enter event read devUsers");
         var destination = "User_List_Service_API";
-        
         var graphQuery = '';
         console.log(req._queryOptions)
 
@@ -77,37 +149,37 @@ module.exports = (srv) => {
     });
 
     srv.after('READ', 'withdrawalCD', (result, req) => {
-        // console.log("Event is: After READ CDs")
+        console.log("Event is: After READ CDs")
 
-        // is_developer = req.user.is("developer");
-        // is_baa = req.user.is("baa");
-        // is_admin = req.user.is("admin");
-        // is_gcm = req.user.is("gcm");
+        is_developer = req.user.is("developer");
+        is_baa = req.user.is("baa");
+        is_admin = req.user.is("admin");
+        is_gcm = req.user.is("gcm");
 
-        // if (Array.isArray(result)) {
-        //     for (let i of result.entries()) {
+        if (Array.isArray(result)) {
+            for (let i of result.entries()) {
 
-        //         if (!is_developer) {
-        //             i[1].assignDevEnabled = false;
-        //             i[1].updateWorkEnabled = false;
-        //         }
+                if (!is_developer) {
+                    i[1].assignDevEnabled = false;
+                    i[1].updateWorkEnabled = false;
+                }
 
-        //         if (!is_baa) {
-        //             i[1].assignBaaEnabled = false;
-        //             i[1].updateCustEnabled = false;
-        //         }
-        //     }
-        // } else {
+                if (!is_baa) {
+                    i[1].assignBaaEnabled = false;
+                    i[1].updateCustEnabled = false;
+                }
+            }
+        } else {
 
-        //     if (!is_developer) {
-        //         result.assignDevEnabled = false;
-        //         result.updateWorkEnabled = false;
-        //     }
-        //     if (!is_baa) {
-        //         result.assignBaaEnabled = false;
-        //         result.updateCustEnabled = false;
-        //     }
-        // }
+            if (!is_developer) {
+                result.assignDevEnabled = false;
+                result.updateWorkEnabled = false;
+            }
+            if (!is_baa) {
+                result.assignBaaEnabled = false;
+                result.updateCustEnabled = false;
+            }
+        }
     })
 
     srv.on('assignBAA', async (req) => {
@@ -225,6 +297,7 @@ module.exports = (srv) => {
             //--------------------------Main Process 1-------------------------------------------------
             let result;
             let action;
+            let category = 'D';
             if (selectcdresult.length === 0) {
                 console.log("Inserting CD");
                 action = "Insert";
@@ -239,16 +312,16 @@ module.exports = (srv) => {
                 let updatecdquery = UPDATE(withdrawalCD, { cdid: inputCD.cdid }).with(inputCD)
                 result = await cds.run(updatecdquery);
 
-                //Get existing CD statuses
+                //Get existing CD statuses and category
                 console.log("Mapping old statuses")
                 overallStatus = selectcdresult[0].overallStatus
                 workStatus = selectcdresult[0].workStatus
                 custStatus = selectcdresult[0].custStatus
-                // console.log("Old values", overallStatus, workStatus, custStatus)
+                category = selectcdresult[0].category_category
             }
 
             //--------------------------Main Process 2-------------------------------------------------
-            //Process TR -> Insert or Update TR; Based on the statuses will update CD status as well
+            //Process TR -> Insert or Update TR; Based on the statuses will update WORK/CUST status as well
             //--------------------------Main Process 2-------------------------------------------------
             if (cdEntry[1].tr_links.length !== 0) {
                 for (let trEntry of cdEntry[1].tr_links.entries()) {
@@ -326,11 +399,17 @@ module.exports = (srv) => {
             }
 
             //--------------------------Main Process 3-------------------------------------------------
-            //Insert Chonological CD Statuses
+            //Insert (C)honological CD (S)tatuses -> Will update Overall Status
             //--------------------------Main Process 3-------------------------------------------------
             let changeOverall = false;
 
             if (cdEntry[1].chronoStatuses.length !== 0) {
+                //First sort cs entries by date
+                var criteria = [];
+                criteria.push({ name: `date`, dir: 'asc' });
+                criteria.push({ name: `time`, dir: 'asc' });
+                sorty(criteria, cdEntry[1].chronoStatuses);
+
                 for (let csEntry of cdEntry[1].chronoStatuses.entries()) {
                     let inputCS = {
                         parent_ID: "",
@@ -348,22 +427,34 @@ module.exports = (srv) => {
                     }
                     inputCS.parent_cdid = inputCD.cdid;
 
-                    let selectcdstatquery = SELECT.from(cdStatus).columns("parent_id", "parent_cdid", "status").where({ parent_cdid: inputCS.parent_cdid, date: inputCS.date, time: inputCS.time, status: inputCS.status })
-                    let selectcdstatresult = await cds.run(selectcdstatquery);
-
-                    if (selectcdstatresult.length === 0) {
+                    //For insert (new CD) -> Determine category || For update (existing CD) -> Determine overall status
+                    if (action == "Insert") {
+                        if (inputCS.status == "To be tested") {
+                            category = "Q";
+                        } else if (inputCS.status == "Imported into Production") {
+                            category = "P";
+                        }
                         let insertcsquery = INSERT.into(cdStatus).entries(inputCS);
                         await cds.run(insertcsquery);
-
-                        if (inputCS.status == "Successfully Tested") {
-                            changeOverall = true
-                        }
                     } else {
-                        //do nothing
+                        let selectcdstatquery = SELECT.from(cdStatus).columns("parent_id", "parent_cdid", "status").where({ parent_cdid: inputCS.parent_cdid, date: inputCS.date, time: inputCS.time, status: inputCS.status })
+                        let selectcdstatresult = await cds.run(selectcdstatquery);
+
+                        if (selectcdstatresult.length == 0) {
+                            let insertcsquery = INSERT.into(cdStatus).entries(inputCS);
+                            await cds.run(insertcsquery);
+
+                            if (category == "Q" && inputCS.status == "Successfully Tested") {
+                                changeOverall = true
+                            } else if (category == "P" && inputCS.status == "Imported into Production") {
+                                changeOverall = true
+                            }
+                        } else {
+                            //do nothing
+                        }
                     }
                 }
             }
-
 
             //--------------------------Main Process 4-------------------------------------------------
             //Determine statuses
@@ -385,10 +476,10 @@ module.exports = (srv) => {
             //update CD PIC + Status(only insert and status changed)
             //else update only PIC
             //--------------------------Main Process 5-------------------------------------------------
-            let updatepicstatquery;
+            let updateheaderquery;
             // if ((action == "Insert") || (workChanged) || (custChanged)) {
-            updatepicstatquery = UPDATE(withdrawalCD, { cdid: inputCD.cdid }).set({
-                baa: baa, developer: developer, baaEmail: baaEmail, devEmail: devEmail,
+                updateheaderquery = UPDATE(withdrawalCD, { cdid: inputCD.cdid }).set({
+                catid_catid: category, baa: baa, developer: developer, baaEmail: baaEmail, devEmail: devEmail,
                 overallStatus: overallStatus, custStatus: custStatus, workStatus: workStatus
             });
             // } else {
@@ -397,7 +488,7 @@ module.exports = (srv) => {
             //     });
             // }
 
-            await cds.run(updatepicstatquery);
+            let updateheaderresult = await cds.run(updateheaderquery);
 
             //--------------------------Main Process 6-------------------------------------------------
             //send email ONLY if PICs are different

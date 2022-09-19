@@ -35,8 +35,6 @@ module.exports = async function (mailfunction, cdid, recipient) {
     }
 
     var payload;
-
-    console.log(mailfunction, typeof mailfunction)
     switch (mailfunction) {
         case "baa":
             payload = baapayload;
@@ -53,7 +51,7 @@ module.exports = async function (mailfunction, cdid, recipient) {
     }
 
     try {
-        // console.log("Mail sending disabled for now");
+        console.log("Mail sending disabled for now");
         // await executeHttpRequest(
         //     {
         //         destinationName: "Mail_Service_API"

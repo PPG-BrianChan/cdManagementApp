@@ -4,8 +4,52 @@ annotate cm.withdrawalCD with {
     cdid          @title     : '{i18n>CDID}';
     cdDesc        @title     : '{i18n>CDDesc}';
     overallStatus @title     : '{i18n>OStatus}';
-    baa           @title     : '{i18n>Baa}';
-    developer     @title     : '{i18n>Developer}';
+    baa           @title     : '{i18n>Baa}'
+                  @Common    : {
+        ValueListWithFixedValues : false,
+        ValueList                : {
+            Label          : '{i18n>User}',
+            CollectionPath : 'baaUsers',
+            Parameters     : [
+                {
+                    $Type             : 'Common.ValueListParameterInOut',
+                    ValueListProperty : 'userid',
+                    LocalDataProperty : baa
+                },
+                {
+                    $Type             : 'Common.ValueListParameterDisplayOnly',
+                    ValueListProperty : 'fullname'
+                },
+                {
+                    $Type             : 'Common.ValueListParameterDisplayOnly',
+                    ValueListProperty : 'email',
+                }
+            ]
+        }
+    };
+    developer     @title     : '{i18n>Developer}'
+                  @Common    : {
+        ValueListWithFixedValues : false,
+        ValueList                : {
+            Label          : '{i18n>User}',
+            CollectionPath : 'devUsers',
+            Parameters     : [
+                {
+                    $Type             : 'Common.ValueListParameterInOut',
+                    ValueListProperty : 'userid',
+                    LocalDataProperty : developer
+                },
+                {
+                    $Type             : 'Common.ValueListParameterDisplayOnly',
+                    ValueListProperty : 'fullname'
+                },
+                {
+                    $Type             : 'Common.ValueListParameterDisplayOnly',
+                    ValueListProperty : 'email',
+                }
+            ]
+        }
+    };
     gcm           @title     : '{i18n>GCM}';
     custStatus    @title     : '{i18n>CStatus}';
     workStatus    @title     : '{i18n>WStatus}';
@@ -36,6 +80,7 @@ annotate cm.withdrawalCD with @UI : {
     },
     SelectionFields     : [
         cdid,
+        catid.catid,//category.category,
         gcm,
         baa,
         developer
@@ -69,6 +114,10 @@ annotate cm.withdrawalCD with @UI : {
         {
             $Type : 'UI.DataField',
             Value : cdDesc
+        },
+        {
+            $Type : 'UI.DataField',
+            Value : catid.catid//category.category
         },
         {
             $Type : 'UI.DataField',
@@ -271,7 +320,7 @@ annotate cm_cdservice.withdrawalCD actions {
         ValueListWithFixedValues : false,
         ValueList                : {
             Label          : '{i18n>User}',
-            CollectionPath : 'users',
+            CollectionPath : 'baaUsers',
             Parameters     : [
                 {
                     $Type             : 'Common.ValueListParameterInOut',
@@ -305,7 +354,7 @@ annotate cm_cdservice.withdrawalCD actions {
         ValueListWithFixedValues : false,
         ValueList                : {
             Label          : '{i18n>User}',
-            CollectionPath : 'users',
+            CollectionPath : 'devUsers',
             Parameters     : [
                 {
                     $Type             : 'Common.ValueListParameterInOut',
@@ -368,12 +417,27 @@ annotate cm_cdservice.withdrawalCD actions {
     newStatus)
 }
 
-annotate cm_cdservice.users with {
-    userid   @title : '{i18n>Userid}';
-    fullname @title : '{i18n>Fullname}';
-    email    @title : '{i18n>Email}';
+annotate cm_cdservice.baaUsers with {
+    userid   @title           : '{i18n>Userid}';
+    fullname @title           : '{i18n>Fullname}';
+    email    @title           : '{i18n>Email}'
+             @UI.HiddenFilter : true;
+}
+
+annotate cm_cdservice.devUsers with {
+    userid   @title           : '{i18n>Userid}'
+             @UI.HiddenFilter : true;
+    fullname @title           : '{i18n>Fullname}'
+             @UI.HiddenFilter : true;
+    email    @title           : '{i18n>Email}'
+             @UI.HiddenFilter : true;
 }
 
 annotate cm_cdservice.status with {
     status @title : '{i18n>Status}'
+}
+
+annotate cm_cdservice.categoryText with {
+    catid @Common.Text : description @Common.TextArrangement : #TextOnly
+          @title     : '{i18n>Category}';
 }
